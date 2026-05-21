@@ -13,7 +13,6 @@
 })();
 </script>
 <style>
-  /* Premium badge styles */
   .premium-badge {
     display: inline-flex; align-items: center; gap: 4px;
     background: linear-gradient(135deg, #f4c430, #e8a000);
@@ -38,8 +37,6 @@
 
 {% block full_page %}
 <div class="root-layout">
-
-  <!-- ═══════════ SIDEBAR ═══════════ -->
   <aside class="sidebar">
 
     <div class="sidebar-nav-box">
@@ -75,8 +72,6 @@
           <span class="nav-icon-wrap"><span class="nav-icon">🔔</span></span> Notifications
           <span class="notif-badge" id="notifBadge" style="display:none">0</span>
         </a>
-
-        <!-- ── PREMIUM SUBSCRIPTION NAV LINK ── -->
         {% if is_premium %}
         <a href="{% url 'music:subscription_dashboard' %}" class="nav-link nav-premium {% if 'subscription' in request.resolver_match.url_name %}active{% endif %}">
           <span class="nav-icon-wrap"><span class="nav-icon">⭐</span></span>
@@ -96,8 +91,6 @@
         {% endif %}
       </nav>
     </div>
-
-    <!-- Library -->
     <div class="sidebar-library">
       <div class="library-header">
         <a href="{% if request.user.is_authenticated %}{% url 'music:playlists' %}{% else %}{% url 'login' %}{% endif %}" class="library-title">
@@ -180,11 +173,7 @@
       </div>
     </div>
   </aside>
-
-  <!-- ═══════════ MAIN ═══════════ -->
   <div class="main-wrapper">
-
-    <!-- Top bar -->
     <header class="topbar" id="topbar">
       <div class="topbar-nav">
         <button class="topbar-btn" onclick="history.back()" title="Back">◀</button>
@@ -198,7 +187,6 @@
 
       <div class="topbar-right">
         {% if request.user.is_authenticated %}
-          <!-- Premium CTA or badge in topbar -->
           {% if is_premium %}
             <a href="{% url 'music:subscription_dashboard' %}" style="text-decoration:none;">
               <span class="premium-badge">⭐ Premium</span>
@@ -234,8 +222,6 @@
         <button onclick="toggleTheme()" class="topbar-theme-btn" id="topbarThemeBtn" title="Toggle dark/light mode">🌙</button>
       </div>
     </header>
-
-    <!-- Messages -->
     {% if messages %}
     <div class="messages" style="position:absolute;top:calc(var(--topbar-h) + 8px);left:28px;right:28px;z-index:60;">
       {% for message in messages %}
@@ -243,18 +229,13 @@
       {% endfor %}
     </div>
     {% endif %}
-
-    <!-- Scrollable content -->
     <div class="main-content" id="mainContent">
       <div class="content-inner">
         {% block content %}{% endblock %}
       </div>
     </div>
   </div>
-
-  <!-- ═══════════ PLAYER ═══════════ -->
   <footer class="player">
-    <!-- Now Playing -->
     <div class="player-now">
       <div class="player-cover-wrap" id="playerCoverWrap">
         <img id="playerCover" src="" alt="" style="display:none">
@@ -266,8 +247,6 @@
       </div>
       <button class="player-heart" id="playerHeart" onclick="toggleCurrentLike()" title="Like">🤍</button>
     </div>
-
-    <!-- Controls -->
     <div class="player-controls">
       <div class="player-btns">
         <button class="ctrl-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">🔀</button>
@@ -282,8 +261,6 @@
         <span class="time" id="duration">0:00</span>
       </div>
     </div>
-
-    <!-- Volume & extras -->
     <div class="player-extras">
       <button class="ctrl-btn" onclick="toggleQueue()" title="Queue">☰</button>
       <div class="volume-wrap">
@@ -294,8 +271,6 @@
   </footer>
 
 </div>
-
-<!-- Queue drawer -->
 <div class="queue-drawer" id="queueDrawer">
   <div class="queue-header">
     <span>Queue</span>
@@ -308,7 +283,6 @@
 
 <audio id="audioPlayer"></audio>
 <script>
-// ── Theme ──────────────────────────────────────────────────
 (function(){
   var t = localStorage.getItem('gh-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', t);
@@ -328,8 +302,6 @@ function _applyThemeUI(t){
   if(text) text.textContent = t === 'dark' ? 'Light Mode' : 'Dark Mode';
   if(topBtn) topBtn.textContent = t === 'dark' ? '☀️' : '🌙';
 }
-
-// ── Topbar scroll effect ───────────────────────────────────
 var mainContent = document.getElementById('mainContent');
 var topbar = document.getElementById('topbar');
 if(mainContent && topbar){
@@ -337,8 +309,6 @@ if(mainContent && topbar){
     topbar.classList.toggle('scrolled', this.scrollTop > 20);
   });
 }
-
-// ── Player ─────────────────────────────────────────────────
 var playlist=[], currentIndex=-1, shuffleOn=false, repeatMode=0;
 var audio = document.getElementById('audioPlayer');
 audio.volume = 0.8;
@@ -438,8 +408,6 @@ audio.addEventListener('ended', function(){
 document.getElementById('progressBar').addEventListener('input', function(){
   if(audio.duration) audio.currentTime = (this.value/100)*audio.duration;
 });
-
-// ── Queue ─────────────────────────────────────────────────
 function toggleQueue(){
   document.getElementById('queueDrawer').classList.toggle('open');
   renderQueue();
@@ -455,8 +423,6 @@ function renderQueue(){
       +'</div>';
   }).join('');
 }
-
-// ── Like current song ─────────────────────────────────────
 function toggleCurrentLike(){
   var s = playlist[currentIndex];
   if(!s || !s.id) return;
@@ -468,8 +434,6 @@ function toggleCurrentLike(){
       btn.classList.toggle('liked', d.liked);
     });
 }
-
-// ── Live search (BUG FIX: updated path to /music/api/search/) ─────────────
 var si = document.getElementById('searchInput');
 if(si){
   var t;
@@ -498,8 +462,6 @@ function renderSearchResults(songs){
       +'</div></div>';
   }).join('');
 }
-
-// ── CSRF ──────────────────────────────────────────────────
 function getCookie(name){
   var v=null;
   document.cookie.split(';').forEach(function(c){
@@ -508,11 +470,7 @@ function getCookie(name){
   });
   return v;
 }
-
-// ── Apply theme UI labels on load ─────────────────────────
 (function(){ _applyThemeUI(localStorage.getItem('gh-theme') || 'dark'); })();
-
-// ── Notification polling ──────────────────────────────────
 {% if request.user.is_authenticated %}
 function pollNotifs(){
   fetch('/music/notifications/count/').then(function(r){ return r.json(); }).then(function(d){
