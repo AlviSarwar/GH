@@ -1,4 +1,4 @@
-# Python
+
 __pycache__/
 *.py[cod]
 *.pyo
@@ -6,7 +6,7 @@ __pycache__/
 .Python
 *.pyc
 
-# Django
+
 *.log
 local_settings.py
 db.sqlite3
@@ -14,12 +14,12 @@ db.sqlite3-journal
 media/
 staticfiles/
 
-# Environment
+
 .env
 .venv
 venv/
 env/
 
-# OS
+
 .DS_Store
 Thumbs.db
