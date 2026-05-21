@@ -185,7 +185,6 @@ class UserProfile(models.Model):
         return f"Profile of {self.user.username}"
 
 
-# ── PREMIUM SUBSCRIPTION ──────────────────────────────────────────────────────
 
 class PremiumSubscription(models.Model):
     PLAN_CHOICES = [
