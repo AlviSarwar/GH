@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ song.title }} — GaanHub{% endblock %}
 {% block content %}
+
 <div class="hero" style="--hero-bg:#3d3d3d;">
   <div>
     {% if song.cover_image %}
@@ -25,6 +26,7 @@
         · <span class="badge free">Free</span>
       {% endif %}
     </p>
+    
     {% if song.genres.all %}
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
       {% for g in song.genres.all %}
@@ -96,6 +98,7 @@
     <a href="{% url 'music:artist_page' song.artist.pk %}" class="btn-outline sm">🎤 Artist</a>
   {% endif %}
   {% endif %}
+  
 
   {% if request.user.is_authenticated and request.user == song.artist.user %}
     <a href="{% url 'music:update_song' song.pk %}" class="btn-outline sm">✏ Edit</a>
@@ -108,6 +111,7 @@
   <a href="{% url 'music:buy_song' song.pk %}">Buy for ৳{{ song.price }}</a> to also download it.
 </div>
 {% endif %}
+
 
 {% if purchased %}
 <div class="info-strip owned-strip">
@@ -129,6 +133,7 @@
       <button type="submit" class="btn-primary xs" id="postCommentBtn" style="display:none">Post</button>
     </div>
   </form>
+  
   {% else %}
   <p class="comment-login-note"><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
   {% endif %}
@@ -148,6 +153,7 @@
         <p class="comment-text">{{ comment.text }}</p>
       </div>
     </div>
+    
     {% empty %}
     <p style="color:var(--gray);font-size:14px;padding:16px 0;" id="noComments">No comments yet.</p>
     {% endfor %}
@@ -171,6 +177,7 @@
 
 <script>
 function ajaxLike(id){
+  
   fetch('/music/like/'+id+'/',{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken'),'X-Requested-With':'XMLHttpRequest'}})
     .then(r=>r.json()).then(d=>{
       var btn=document.getElementById('likeBtn'),cnt=document.getElementById('likeCount');
