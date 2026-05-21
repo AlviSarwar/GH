@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Artists — GaanHub{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Artists</h1>
+  <form method="GET" class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" name="q" placeholder="Search artists…" value="{{ query }}">
+  </form>
+</div>
+<div class="artists-grid">
+  {% for artist in artists %}
+  <a href="{% url 'music:artist_page' artist.pk %}" class="artist-card">
+    {% if artist.image %}
+      <img src="{{ artist.image.url }}" class="artist-card-img" alt="{{ artist.name }}">
+    {% else %}
+      <div class="artist-card-img-placeholder">{{ artist.name|first|upper }}</div>
+    {% endif %}
+    <div class="artist-card-name">{{ artist.name }}</div>
+    <div class="artist-card-meta">Artist</div>
+  </a>
+  {% empty %}
+  <div class="empty-state"><span class="empty-icon">🎤</span><p>No artists found.</p></div>
+  {% endfor %}
+</div>
+{% endblock %}

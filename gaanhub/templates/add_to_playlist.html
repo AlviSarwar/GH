@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Add to Playlist — GaanHub{% endblock %}
+{% block content %}
+<div class="form-page">
+    <h1>Add to Playlist</h1>
+    <p class="subtitle">Adding: <strong>{{ song.title }}</strong></p>
+
+    {% if playlists %}
+    <div class="playlist-picker">
+        {% for pl in playlists %}
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="playlist_id" value="{{ pl.pk }}">
+            <button type="submit" class="playlist-pick-btn">
+                <span class="pick-icon">📋</span>
+                <span class="pick-name">{{ pl.name }}</span>
+                <span class="pick-count">{{ pl.songs.count }} songs</span>
+            </button>
+        </form>
+        {% endfor %}
+    </div>
+    <hr class="divider">
+    <p class="subtitle">Or add to a new playlist:</p>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="gaanhub-form">
+            <div class="field">
+                <label>New Playlist Name</label>
+                <input type="text" name="new_playlist_name" placeholder="e.g. Chill Vibes">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">+ Create & Add</button>
+                <a href="{% url 'music:song_detail' song.pk %}" class="btn-outline">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

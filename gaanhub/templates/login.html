@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GaanHub — Login</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="auth-page">
+<div class="auth-box">
+    <div class="auth-logo">🎵 GaanHub</div>
+    <h2>Log in to GaanHub</h2>
+
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+    {% endif %}
+
+    {% if form.errors %}
+    <div class="alert alert-error">Invalid username or password.</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="field">
+            <label>Username</label>
+            <input type="text" name="username" autofocus placeholder="Your username">
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Your password">
+        </div>
+        <button type="submit" class="btn-primary full">Log In</button>
+    </form>
+    <p class="auth-alt">Don't have an account? <a href="{% url 'users:register' %}">Sign up</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }} — GaanHub{% endblock %}
+{% block content %}
+<div class="profile-hero">
+  <div class="profile-avatar" style="background:{{ profile.avatar_color }};">{{ profile_user.username|first|upper }}</div>
+  <div class="profile-info">
+    <h1 class="profile-name">{{ profile_user.username }}</h1>
+    {% if profile.bio %}<p class="profile-bio">{{ profile.bio }}</p>{% endif %}
+    {% if subscription and subscription.is_active %}
+    <span class="badge premium">🎧 Premium — {{ subscription.get_plan_display }}</span>
+    {% endif %}
+    {% if is_own %}
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+      <a href="{% url 'music:edit_profile' %}" class="btn-outline sm">✏ Edit Profile</a>
+      <a href="{% url 'music:change_password' %}" class="btn-outline sm">🔒 Change Password</a>
+      <a href="{% url 'music:subscription_plans' %}" class="btn-outline sm">{% if subscription and subscription.is_active %}⭐ Manage Premium{% else %}🎧 Get Premium{% endif %}</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Purchased Songs -->
+{% if is_own and purchased_songs %}
+<section class="profile-section">
+  <h2 class="section-title">🛒 Purchased Songs</h2>
+  <div class="songs-grid">
+    {% for p in purchased_songs %}
+    <div class="song-card">
+      <div class="card-img-wrap">
+        {% if p.song.cover_image %}<img src="{{ p.song.cover_image.url }}" class="card-img" alt="">
+        {% else %}<div class="card-img placeholder">🎵</div>{% endif %}
+        <button class="card-play" onclick="playSong('{{ p.song.audio_file.url }}','{{ p.song.title|escapejs }}','{% if p.song.artist %}{{ p.song.artist.name|escapejs }}{% endif %}','{% if p.song.cover_image %}{{ p.song.cover_image.url }}{% endif %}',{{ p.song.pk }})">▶</button>
+      </div>
+      <div class="card-body">
+        <a href="{% url 'music:song_detail' p.song.pk %}" class="card-title">{{ p.song.title }}</a>
+        {% if p.song.artist %}<a href="{% url 'music:artist_page' p.song.artist.pk %}" class="card-artist">{{ p.song.artist.name }}</a>{% endif %}
+        <div class="card-meta">
+          <span class="badge owned">✓ Owned</span>
+          <a href="{% url 'music:download_song' p.song.pk %}" class="action-btn" title="Download">⬇ Download</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Liked Songs -->
+{% if liked_songs %}
+<section class="profile-section">
+  <h2 class="section-title">❤ Liked Songs</h2>
+  <div class="songs-grid">
+    {% for song in liked_songs %}
+    <div class="song-card">
+      <div class="card-img-wrap">
+        {% if song.cover_image %}<img src="{{ song.cover_image.url }}" class="card-img" alt="">
+        {% else %}<div class="card-img placeholder">🎵</div>{% endif %}
+        <button class="card-play" onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">▶</button>
+      </div>
+      <div class="card-body">
+        <a href="{% url 'music:song_detail' song.pk %}" class="card-title">{{ song.title }}</a>
+        {% if song.artist %}<a href="{% url 'music:artist_page' song.artist.pk %}" class="card-artist">{{ song.artist.name }}</a>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Playlists -->
+{% if playlists %}
+<section class="profile-section">
+  <h2 class="section-title">🎵 Playlists</h2>
+  <div class="playlist-grid">
+    {% for pl in playlists %}
+    <a href="{% url 'music:playlist_detail' pl.pk %}" class="playlist-card">
+      <div class="playlist-icon">🎵</div>
+      <div>
+        <div class="playlist-name">{{ pl.name }}</div>
+        <div class="playlist-count">{{ pl.songs.count }} songs</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Following -->
+{% if followed_artists %}
+<section class="profile-section">
+  <h2 class="section-title">🎤 Following</h2>
+  <div class="artists-row">
+    {% for artist in followed_artists %}
+    <a href="{% url 'music:artist_page' artist.pk %}" class="artist-pill">
+      <div class="artist-pill-avatar">{{ artist.name|first|upper }}</div>
+      <span>{{ artist.name }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<style>
+.badge.owned{background:#3D91F4;color:#fff;padding:3px 8px;border-radius:20px;font-size:11px;}
+</style>
+{% endblock %}

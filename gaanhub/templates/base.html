@@ -1,0 +1,528 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}GaanHub{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script>
+(function(){
+  var t = localStorage.getItem('gh-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<style>
+  /* Premium badge styles */
+  .premium-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: linear-gradient(135deg, #f4c430, #e8a000);
+    color: #000; font-size: 10px; font-weight: 800;
+    padding: 2px 7px; border-radius: 12px; letter-spacing: .5px;
+    vertical-align: middle; text-transform: uppercase;
+  }
+  .nav-premium { background: linear-gradient(90deg,#f4c43022,transparent); border-left: 2px solid #f4c430; }
+  .nav-premium .nav-icon { filter: none; }
+  .topbar-premium-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg,#f4c430,#e8a000);
+    color: #000; font-size: 11px; font-weight: 800;
+    padding: 5px 12px; border-radius: 20px; text-decoration: none;
+    transition: opacity .15s; letter-spacing: .3px;
+  }
+  .topbar-premium-btn:hover { opacity: .85; }
+  .sub-active-dot { width: 8px; height: 8px; background: #f4c430; border-radius: 50%; display: inline-block; box-shadow: 0 0 6px #f4c430; }
+</style>
+</head>
+<body>
+
+{% block full_page %}
+<div class="root-layout">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar">
+
+    <div class="sidebar-nav-box">
+      <a href="{% url 'landing' %}" class="logo">
+        <span class="logo-icon">🎵</span>
+        <span class="logo-text">GaanHub</span>
+      </a>
+
+      <nav class="nav">
+        <a href="{% url 'music:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🏠</span></span> Home
+        </a>
+        <a href="{% url 'music:global_search' %}" class="nav-link {% if request.resolver_match.url_name == 'global_search' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🔍</span></span> Search
+        </a>
+        <a href="{% url 'music:songs' %}" class="nav-link {% if request.resolver_match.url_name == 'songs' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🎵</span></span> Songs
+        </a>
+        <a href="{% url 'music:charts' %}" class="nav-link {% if request.resolver_match.url_name == 'charts' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">📊</span></span> Charts
+        </a>
+        <a href="{% url 'music:genres' %}" class="nav-link {% if 'genre' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🎸</span></span> Genres
+        </a>
+        <a href="{% url 'music:all_artists' %}" class="nav-link {% if request.resolver_match.url_name == 'all_artists' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🎤</span></span> Artists
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'music:history' %}" class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🕘</span></span> History
+        </a>
+        <a href="{% url 'music:notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🔔</span></span> Notifications
+          <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+        </a>
+
+        <!-- ── PREMIUM SUBSCRIPTION NAV LINK ── -->
+        {% if is_premium %}
+        <a href="{% url 'music:subscription_dashboard' %}" class="nav-link nav-premium {% if 'subscription' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">⭐</span></span>
+          Premium <span class="sub-active-dot" style="margin-left:4px;"></span>
+        </a>
+        {% else %}
+        <a href="{% url 'music:subscription_plans' %}" class="nav-link {% if 'subscription' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">⭐</span></span> Upgrade
+        </a>
+        {% endif %}
+
+        {% if request.user.artist %}
+        <a href="{% url 'music:artist_panel' %}" class="nav-link {% if request.resolver_match.url_name == 'artist_panel' %}active{% endif %}">
+          <span class="nav-icon-wrap"><span class="nav-icon">🎙</span></span> Artist Panel
+        </a>
+        {% endif %}
+        {% endif %}
+      </nav>
+    </div>
+
+    <!-- Library -->
+    <div class="sidebar-library">
+      <div class="library-header">
+        <a href="{% if request.user.is_authenticated %}{% url 'music:playlists' %}{% else %}{% url 'login' %}{% endif %}" class="library-title">
+          <span class="library-title-icon">📚</span> Your Library
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'music:playlists' %}" class="library-create" title="Create playlist">+</a>
+        {% endif %}
+      </div>
+
+      <div class="library-list">
+        {% if request.user.is_authenticated %}
+          {% if request.user.artist %}
+          <a href="{% url 'music:artist_page' request.user.artist.pk %}" class="library-item">
+            <div class="library-item-cover circle" style="background: var(--green); color: #000; font-size: 20px; font-weight: 900;">
+              {{ request.user.username|first|upper }}
+            </div>
+            <div class="library-item-info">
+              <span class="library-item-name">{{ request.user.artist.name }}</span>
+              <span class="library-item-meta">Artist</span>
+            </div>
+          </a>
+          {% endif %}
+          <a href="{% url 'music:history' %}" class="library-item">
+            <div class="library-item-cover" style="background: linear-gradient(135deg,#450af5,#8e8ee5);">🕘</div>
+            <div class="library-item-info">
+              <span class="library-item-name">Recently Played</span>
+              <span class="library-item-meta">Playlist</span>
+            </div>
+          </a>
+          <a href="{% url 'music:playlists' %}" class="library-item">
+            <div class="library-item-cover" style="background: var(--bg4); font-size:22px;">📋</div>
+            <div class="library-item-info">
+              <span class="library-item-name">My Playlists</span>
+              <span class="library-item-meta">Playlist</span>
+            </div>
+          </a>
+          {% if request.user.artist %}
+          <div style="padding:8px 4px 4px;">
+            <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gray3);display:block;margin-bottom:6px;padding:0 4px;">Current Mode</span>
+            <a href="{% url 'music:switch_mode' %}" class="sidebar-mode-btn {% if request.session.mode == 'artist' %}sidebar-mode-artist{% else %}sidebar-mode-listener{% endif %}">
+              <span class="sidebar-mode-icon">{% if request.session.mode == 'artist' %}🎙{% else %}🎧{% endif %}</span>
+              <div class="sidebar-mode-info">
+                <span class="sidebar-mode-name">{% if request.session.mode == 'artist' %}Artist Mode{% else %}Listener Mode{% endif %}</span>
+                <span class="sidebar-mode-hint">Switch to {% if request.session.mode == 'artist' %}Listener{% else %}Artist{% endif %} Mode</span>
+              </div>
+              <span class="sidebar-mode-swap">⇄</span>
+            </a>
+          </div>
+          {% else %}
+          <div style="padding:8px 4px 4px;">
+            <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gray3);display:block;margin-bottom:6px;padding:0 4px;">Your Mode</span>
+            <div class="sidebar-mode-btn sidebar-mode-listener" style="cursor:default;opacity:.75;">
+              <span class="sidebar-mode-icon">🎧</span>
+              <div class="sidebar-mode-info">
+                <span class="sidebar-mode-name">Listener Mode</span>
+                <span class="sidebar-mode-hint">Currently listening</span>
+              </div>
+            </div>
+            <a href="{% url 'music:become_artist' %}" class="sidebar-become-artist-btn" title="Become an Artist">
+              <span>🎤</span>
+              <div class="sidebar-mode-info">
+                <span class="sidebar-mode-name">Become an Artist</span>
+                <span class="sidebar-mode-hint">Upload music &amp; earn</span>
+              </div>
+              <span style="font-size:12px;opacity:.7;">→</span>
+            </a>
+          </div>
+          {% endif %}
+        {% else %}
+          <div style="padding:16px 8px; color: var(--gray); font-size:13px;">
+            <p style="margin-bottom:12px;">Create your first playlist</p>
+            <a href="{% url 'login' %}" class="btn-primary xs">Log in</a>
+          </div>
+        {% endif %}
+
+        <button onclick="toggleTheme()" class="theme-toggle-sidebar" id="themeBtn" title="Toggle theme">
+          <span id="themeBtnIcon">☀️</span> <span id="themeBtnText">Light Mode</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main-wrapper">
+
+    <!-- Top bar -->
+    <header class="topbar" id="topbar">
+      <div class="topbar-nav">
+        <button class="topbar-btn" onclick="history.back()" title="Back">◀</button>
+        <button class="topbar-btn" onclick="history.forward()" title="Forward">▶</button>
+      </div>
+
+      <form method="get" action="{% url 'music:global_search' %}" class="topbar-search">
+        <span style="font-size:14px;color:#888">🔍</span>
+        <input type="text" name="q" placeholder="What do you want to listen to?" value="{{ request.GET.q }}">
+      </form>
+
+      <div class="topbar-right">
+        {% if request.user.is_authenticated %}
+          <!-- Premium CTA or badge in topbar -->
+          {% if is_premium %}
+            <a href="{% url 'music:subscription_dashboard' %}" style="text-decoration:none;">
+              <span class="premium-badge">⭐ Premium</span>
+            </a>
+          {% else %}
+            <a href="{% url 'music:subscription_plans' %}" class="topbar-premium-btn">⭐ Go Premium</a>
+          {% endif %}
+          {% if request.user.artist %}
+          <a href="{% url 'music:switch_mode' %}" class="mode-toggle-btn {% if request.session.mode == 'artist' %}mode-artist{% else %}mode-listener{% endif %}" title="{% if request.session.mode == 'artist' %}Switch to Listener Mode{% else %}Switch to Artist Mode{% endif %}">
+            <span class="mode-toggle-pill">
+              <span class="mode-toggle-icon">{% if request.session.mode == 'artist' %}🎙{% else %}🎧{% endif %}</span>
+              <span class="mode-toggle-label">{% if request.session.mode == 'artist' %}Artist{% else %}Listener{% endif %}</span>
+              <span class="mode-toggle-arrow">⇄</span>
+            </span>
+          </a>
+          {% else %}
+          <a href="{% url 'music:become_artist' %}" class="topbar-become-artist-btn" title="Create an artist profile">
+            <span>🎤</span> <span class="topbar-become-artist-label">Become Artist</span>
+          </a>
+          {% endif %}
+          <a href="{% url 'music:my_profile' %}" class="topbar-user">
+            <div class="topbar-avatar" style="background:{% if is_premium %}linear-gradient(135deg,#f4c430,#e8a000){% else %}var(--green){% endif %};">{{ request.user.username|first|upper }}</div>
+            <span class="topbar-username">{{ request.user.username }}</span>
+          </a>
+          <form method="post" action="{% url 'logout' %}" style="margin:0">
+            {% csrf_token %}
+            <button type="submit" class="btn-outline xs" style="border-radius:20px;">Log out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'users:register' %}" class="btn-outline xs">Sign up</a>
+          <a href="{% url 'login' %}" class="btn-primary xs">Log in</a>
+        {% endif %}
+        <button onclick="toggleTheme()" class="topbar-theme-btn" id="topbarThemeBtn" title="Toggle dark/light mode">🌙</button>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages" style="position:absolute;top:calc(var(--topbar-h) + 8px);left:28px;right:28px;z-index:60;">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Scrollable content -->
+    <div class="main-content" id="mainContent">
+      <div class="content-inner">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PLAYER ═══════════ -->
+  <footer class="player">
+    <!-- Now Playing -->
+    <div class="player-now">
+      <div class="player-cover-wrap" id="playerCoverWrap">
+        <img id="playerCover" src="" alt="" style="display:none">
+        <span id="playerCoverIcon">🎵</span>
+      </div>
+      <div class="player-track">
+        <div class="player-title" id="nowPlaying">—</div>
+        <div class="player-artist" id="nowArtist">Select a song to play</div>
+      </div>
+      <button class="player-heart" id="playerHeart" onclick="toggleCurrentLike()" title="Like">🤍</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="player-controls">
+      <div class="player-btns">
+        <button class="ctrl-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">🔀</button>
+        <button class="ctrl-btn" onclick="prevSong()" title="Previous">⏮</button>
+        <button class="play-btn ctrl-btn" id="playPauseBtn" onclick="playPause()">▶</button>
+        <button class="ctrl-btn" onclick="nextSong()" title="Next">⏭</button>
+        <button class="ctrl-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat">🔁</button>
+      </div>
+      <div class="player-progress">
+        <span class="time" id="currentTime">0:00</span>
+        <input type="range" class="progress-bar" id="progressBar" value="0" min="0" max="100" step="0.1">
+        <span class="time" id="duration">0:00</span>
+      </div>
+    </div>
+
+    <!-- Volume & extras -->
+    <div class="player-extras">
+      <button class="ctrl-btn" onclick="toggleQueue()" title="Queue">☰</button>
+      <div class="volume-wrap">
+        <span style="font-size:14px;color:var(--gray)">🔊</span>
+        <input type="range" class="volume-bar" id="volumeBar" value="80" min="0" max="100" oninput="setVolume(this.value/100)">
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Queue drawer -->
+<div class="queue-drawer" id="queueDrawer">
+  <div class="queue-header">
+    <span>Queue</span>
+    <button class="queue-close" onclick="toggleQueue()">✕</button>
+  </div>
+  <div class="queue-list" id="queueList"><p class="queue-empty">Queue is empty</p></div>
+</div>
+
+{% endblock %}
+
+<audio id="audioPlayer"></audio>
+<script>
+// ── Theme ──────────────────────────────────────────────────
+(function(){
+  var t = localStorage.getItem('gh-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+function toggleTheme(){
+  var html = document.documentElement;
+  var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('gh-theme', next);
+  _applyThemeUI(next);
+}
+function _applyThemeUI(t){
+  var icon = document.getElementById('themeBtnIcon');
+  var text = document.getElementById('themeBtnText');
+  var topBtn = document.getElementById('topbarThemeBtn');
+  if(icon) icon.textContent = t === 'dark' ? '☀️' : '🌙';
+  if(text) text.textContent = t === 'dark' ? 'Light Mode' : 'Dark Mode';
+  if(topBtn) topBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+
+// ── Topbar scroll effect ───────────────────────────────────
+var mainContent = document.getElementById('mainContent');
+var topbar = document.getElementById('topbar');
+if(mainContent && topbar){
+  mainContent.addEventListener('scroll', function(){
+    topbar.classList.toggle('scrolled', this.scrollTop > 20);
+  });
+}
+
+// ── Player ─────────────────────────────────────────────────
+var playlist=[], currentIndex=-1, shuffleOn=false, repeatMode=0;
+var audio = document.getElementById('audioPlayer');
+audio.volume = 0.8;
+
+function playSong(url, title, artist, cover, songId){
+  if(songId){
+    fetch("/music/record-play/"+songId+"/",{method:"POST",headers:{"X-CSRFToken":getCookie("csrftoken")}})
+      .then(function(r){
+        if(r.status===403){ r.json().then(function(d){ showPremiumGate(songId, title||"This song"); }); return; }
+        _doPlay(url,title,artist,cover,songId);
+      }).catch(function(){ _doPlay(url,title,artist,cover,songId); });
+  } else { _doPlay(url,title,artist,cover,songId); }
+}
+function _doPlay(url,title,artist,cover,songId){
+  var existing=playlist.findIndex(function(s){ return s.url===url; });
+  if(existing===-1){ playlist.push({url:url,title:title||"Unknown",artist:artist||"",cover:cover||"",id:songId||null}); existing=playlist.length-1; }
+  currentIndex=existing; playCurrent();
+}
+function showPremiumGate(songId,title){
+  var msg="🔒 ""+title+"" is a premium song.
+
+You can:
+• Subscribe to stream ALL premium songs
+• Or buy this song to own & download it forever.
+
+Click OK to go to the song page.";
+  if(confirm(msg)){ window.location.href="/music/songs/"+songId+"/"; }
+}
+
+function playCurrent(){
+  if(currentIndex < 0 || !playlist[currentIndex]) return;
+  var s = playlist[currentIndex];
+  audio.src = s.url;
+  audio.play();
+  document.getElementById('nowPlaying').textContent = s.title;
+  document.getElementById('nowArtist').textContent = s.artist || 'Unknown Artist';
+  document.getElementById('playPauseBtn').textContent = '⏸';
+  var coverImg = document.getElementById('playerCover');
+  var coverIcon = document.getElementById('playerCoverIcon');
+  if(s.cover){ coverImg.src=s.cover; coverImg.style.display='block'; coverIcon.style.display='none'; }
+  else { coverImg.style.display='none'; coverIcon.style.display='block'; }
+  renderQueue();
+  document.title = s.title + ' — GaanHub';
+}
+
+function playPause(){
+  if(audio.paused){ audio.play(); document.getElementById('playPauseBtn').textContent='⏸'; }
+  else { audio.pause(); document.getElementById('playPauseBtn').textContent='▶'; }
+}
+
+function nextSong(){
+  if(!playlist.length) return;
+  if(shuffleOn){ currentIndex=Math.floor(Math.random()*playlist.length); }
+  else { currentIndex=(currentIndex+1)%playlist.length; }
+  playCurrent();
+}
+
+function prevSong(){
+  if(!playlist.length) return;
+  if(audio.currentTime > 3){ audio.currentTime=0; return; }
+  currentIndex = (currentIndex-1+playlist.length)%playlist.length;
+  playCurrent();
+}
+
+function toggleShuffle(){
+  shuffleOn = !shuffleOn;
+  document.getElementById('shuffleBtn').classList.toggle('active', shuffleOn);
+}
+
+function toggleRepeat(){
+  repeatMode = (repeatMode+1)%3;
+  var btn = document.getElementById('repeatBtn');
+  btn.classList.toggle('active', repeatMode > 0);
+  btn.textContent = repeatMode===2 ? '🔂' : '🔁';
+}
+
+function setVolume(v){ audio.volume = v; }
+
+function fmtTime(s){
+  s = Math.floor(s||0);
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+
+audio.addEventListener('timeupdate', function(){
+  if(audio.duration){
+    document.getElementById('progressBar').value = (audio.currentTime/audio.duration)*100;
+    document.getElementById('currentTime').textContent = fmtTime(audio.currentTime);
+  }
+});
+audio.addEventListener('loadedmetadata', function(){
+  document.getElementById('duration').textContent = fmtTime(audio.duration);
+});
+audio.addEventListener('ended', function(){
+  if(repeatMode===2){ audio.currentTime=0; audio.play(); }
+  else { nextSong(); }
+});
+document.getElementById('progressBar').addEventListener('input', function(){
+  if(audio.duration) audio.currentTime = (this.value/100)*audio.duration;
+});
+
+// ── Queue ─────────────────────────────────────────────────
+function toggleQueue(){
+  document.getElementById('queueDrawer').classList.toggle('open');
+  renderQueue();
+}
+function renderQueue(){
+  var list = document.getElementById('queueList');
+  if(!playlist.length){ list.innerHTML='<p class="queue-empty">Queue is empty</p>'; return; }
+  list.innerHTML = playlist.map(function(s,i){
+    return '<div class="queue-item '+(i===currentIndex?'current':'')+'" onclick="currentIndex='+i+';playCurrent()">'
+      +'<span class="queue-num">'+(i+1)+'</span>'
+      +'<div class="queue-info"><span class="queue-title">'+s.title+'</span><span class="queue-artist">'+s.artist+'</span></div>'
+      +(i===currentIndex?'<span class="queue-playing">▶</span>':'')
+      +'</div>';
+  }).join('');
+}
+
+// ── Like current song ─────────────────────────────────────
+function toggleCurrentLike(){
+  var s = playlist[currentIndex];
+  if(!s || !s.id) return;
+  fetch('/music/like/'+s.id+'/', {method:'POST', headers:{'X-CSRFToken':getCookie('csrftoken'),'X-Requested-With':'XMLHttpRequest'}})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var btn = document.getElementById('playerHeart');
+      btn.textContent = d.liked ? '❤️' : '🤍';
+      btn.classList.toggle('liked', d.liked);
+    });
+}
+
+// ── Live search (BUG FIX: updated path to /music/api/search/) ─────────────
+var si = document.getElementById('searchInput');
+if(si){
+  var t;
+  si.addEventListener('input', function(){
+    clearTimeout(t);
+    var q = this.value.trim();
+    t = setTimeout(function(){
+      if(!q) return;
+      fetch('/music/api/search/?q='+encodeURIComponent(q))
+        .then(function(r){ return r.json(); })
+        .then(function(d){ renderSearchResults(d.songs); });
+    }, 300);
+  });
+}
+function renderSearchResults(songs){
+  var c = document.getElementById('songsContainer');
+  if(!c) return;
+  if(!songs.length){ c.innerHTML='<div class="empty-state"><span class="empty-icon">🎵</span><p>No songs found</p></div>'; return; }
+  c.innerHTML = songs.map(function(s){
+    return '<div class="song-card"><div class="card-img-wrap">'
+      +(s.cover?'<img src="'+s.cover+'" class="card-img" alt="">':'<div class="card-img placeholder">🎵</div>')
+      +'<button class="card-play" onclick="playSong(\''+s.audio+'\',\''+s.title+'\',\''+s.artist+'\',\''+s.cover+'\','+s.id+')">▶</button>'
+      +'</div><div class="card-body"><a href="/music/songs/'+s.id+'/" class="card-title">'+s.title+'</a>'
+      +'<span class="card-artist">'+s.artist+'</span>'
+      +(s.is_premium?'<span class="badge premium">৳'+s.price+'</span>':'<span class="badge free">Free</span>')
+      +'</div></div>';
+  }).join('');
+}
+
+// ── CSRF ──────────────────────────────────────────────────
+function getCookie(name){
+  var v=null;
+  document.cookie.split(';').forEach(function(c){
+    var t=c.trim();
+    if(t.startsWith(name+'=')) v=decodeURIComponent(t.slice(name.length+1));
+  });
+  return v;
+}
+
+// ── Apply theme UI labels on load ─────────────────────────
+(function(){ _applyThemeUI(localStorage.getItem('gh-theme') || 'dark'); })();
+
+// ── Notification polling ──────────────────────────────────
+{% if request.user.is_authenticated %}
+function pollNotifs(){
+  fetch('/music/notifications/count/').then(function(r){ return r.json(); }).then(function(d){
+    var b = document.getElementById('notifBadge');
+    if(b){ if(d.count>0){b.textContent=d.count;b.style.display='inline-block';}else{b.style.display='none';} }
+  }).catch(function(){});
+}
+pollNotifs();
+setInterval(pollNotifs, 30000);
+{% endif %}
+</script>
+</body>
+</html>

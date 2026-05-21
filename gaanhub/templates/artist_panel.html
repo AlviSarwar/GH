@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% block title %}Artist Panel — GaanHub{% endblock %}
+{% block content %}
+
+<!-- Artist Hero -->
+<div class="hero" style="--hero-bg:#0d2d1a; padding-bottom:20px;">
+  {% if artist.image %}
+    <img src="{{ artist.image.url }}" class="hero-cover circle" alt="{{ artist.name }}" style="width:140px;height:140px;">
+  {% else %}
+    <div class="hero-cover-placeholder circle" style="width:140px;height:140px;font-size:56px;">🎤</div>
+  {% endif %}
+  <div class="hero-info">
+    <p class="hero-type" style="color:var(--green);">Artist Dashboard</p>
+    <h1 class="hero-title sm">{{ artist.name }}</h1>
+    <p class="hero-meta">
+      <strong style="color:var(--green);">{{ follower_count }}</strong> followers &nbsp;·&nbsp;
+      <strong>{{ songs.count }}</strong> songs &nbsp;·&nbsp;
+      <strong>{{ total_plays }}</strong> total plays
+    </p>
+    <!-- Artist tier -->
+    {% if total_plays >= 10000 %}
+      <span class="artist-tier superstar" style="margin-top:10px;display:inline-flex;">⭐ Superstar</span>
+    {% elif total_plays >= 1000 %}
+      <span class="artist-tier established" style="margin-top:10px;display:inline-flex;">🎵 Established</span>
+    {% else %}
+      <span class="artist-tier rising" style="margin-top:10px;display:inline-flex;">🚀 Rising Artist</span>
+    {% endif %}
+  </div>
+  <div>
+    <a href="{% url 'music:create_song' %}" class="btn-primary">+ Upload Song</a>
+  </div>
+</div>
+
+<!-- Tab navigation -->
+<div class="panel-tabs">
+  <button class="panel-tab active" onclick="showTab('overview', this)">📊 Overview</button>
+  <button class="panel-tab" onclick="showTab('songs', this)">🎵 My Songs</button>
+  <button class="panel-tab" onclick="showTab('earnings', this)">💰 Earnings</button>
+  <button class="panel-tab" onclick="showTab('upload', this)">⬆ Upload</button>
+</div>
+
+<!-- OVERVIEW TAB -->
+<div class="panel-section active" id="tab-overview">
+
+  <!-- Revenue streams -->
+  <div class="revenue-streams">
+    <div class="revenue-stream-card" style="--stream-color:var(--green);">
+      <div class="stream-icon">▶</div>
+      <div class="stream-label">Total Plays</div>
+      <div class="stream-value">{{ total_plays }}</div>
+      <div class="stream-sub play-rate-info">Rate: <span class="rate">৳0.50</span> / 1000 plays</div>
+    </div>
+    <div class="revenue-stream-card" style="--stream-color:#f4c430;">
+      <div class="stream-icon">💰</div>
+      <div class="stream-label">Song Sales</div>
+      <div class="stream-value">৳{{ total_earned|floatformat:0 }}</div>
+      <div class="stream-sub">{{ total_sales }} sale{{ total_sales|pluralize }}</div>
+    </div>
+    <div class="revenue-stream-card" style="--stream-color:#509bf5;">
+      <div class="stream-icon">❤</div>
+      <div class="stream-label">Total Likes</div>
+      <div class="stream-value">{{ total_likes }}</div>
+      <div class="stream-sub">Across all songs</div>
+    </div>
+    <div class="revenue-stream-card" style="--stream-color:#e8115b;">
+      <div class="stream-icon">👥</div>
+      <div class="stream-label">Followers</div>
+      <div class="stream-value">{{ follower_count }}</div>
+      <div class="stream-sub">Listening to you</div>
+    </div>
+  </div>
+
+  <!-- Wallet quick-view -->
+  <div style="background:linear-gradient(135deg,#0a2a18,#0d3d24);border-radius:var(--radius-xl);padding:22px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;border:1px solid rgba(29,185,84,.2);">
+    <div style="flex:1;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(29,185,84,.7);margin-bottom:4px;">Wallet Balance</div>
+      <div style="font-size:38px;font-weight:900;color:var(--green);letter-spacing:-1px;">৳{% if artist.wallet %}{{ artist.wallet.balance|floatformat:2 }}{% else %}0.00{% endif %}</div>
+      <div style="font-size:12px;color:var(--gray);margin-top:4px;">৳0.50 credited per 1,000 plays · 80% of each sale</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="{% url 'music:wallet_dashboard' %}" class="btn-outline sm">📊 View Wallet</a>
+      <a href="{% url 'music:request_withdrawal' %}" class="btn-primary sm">💸 Withdraw</a>
+    </div>
+  </div>
+
+  <!-- Earnings Hero -->
+  <div class="earnings-hero">
+    <div>
+      <div class="earnings-label">Estimated Total Earnings</div>
+      <div class="earnings-big">৳{{ estimated_earnings|floatformat:2 }}</div>
+      <div class="play-rate-info" style="margin-top:4px;">
+        Stream revenue: ৳{{ stream_earnings|floatformat:2 }} &nbsp;+&nbsp; Sales: ৳{{ total_earned|floatformat:2 }}
+      </div>
+    </div>
+    <div class="earnings-divider"></div>
+    <div>
+      <div class="earnings-label">This Month's Plays</div>
+      <div style="font-size:28px;font-weight:900;">{{ monthly_plays }}</div>
+      <div class="play-rate-info">≈ ৳{{ monthly_stream_earn|floatformat:2 }} stream revenue</div>
+    </div>
+    <div class="earnings-divider"></div>
+    <div>
+      <div class="earnings-label">Payout Status</div>
+      <div class="payout-status" style="margin-top:8px;">
+        <span class="payout-dot"></span>
+        <span style="font-weight:700;font-size:14px;">Active</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray);">Next payout: End of month</div>
+    </div>
+  </div>
+
+  <!-- Song performance table -->
+  {% if songs %}
+  <div class="section-header"><h2 class="section-title sm">🎵 Song Performance</h2></div>
+  <div class="songs-table-wrap">
+    <table class="song-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Song</th>
+          <th>Plays</th>
+          <th>Likes</th>
+          <th>Revenue</th>
+          <th>Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for song in songs %}
+        <tr>
+          <td style="color:var(--gray);">{{ forloop.counter }}</td>
+          <td>
+            <div class="table-song">
+              {% if song.cover_image %}
+                <img src="{{ song.cover_image.url }}" class="table-thumb" alt="">
+              {% else %}
+                <div class="table-thumb-placeholder">🎵</div>
+              {% endif %}
+              <div>
+                <a href="{% url 'music:song_detail' song.pk %}" style="font-weight:600;color:var(--white);">{{ song.title }}</a>
+              </div>
+            </div>
+          </td>
+          <td>{{ song.play_count }}</td>
+          <td>{{ song.likes.count }}</td>
+          <td style="color:var(--green);font-weight:700;">
+            {% if song.is_premium %}
+              ৳{{ song.purchases.count|default:0 }} sales
+            {% else %}
+              ৳{% widthratio song.play_count 1000 0.5 %}
+            {% endif %}
+          </td>
+          <td>
+            {% if song.is_premium %}
+              <span class="price-tag">৳{{ song.price }}</span>
+            {% else %}
+              <span class="badge free">Free</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="table-actions">
+              <a href="{% url 'music:update_song' song.pk %}" class="action-btn">✏</a>
+              <a href="{% url 'music:delete_song' song.pk %}" class="action-btn danger">🗑</a>
+              <button onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{{ artist.name|escapejs }}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})" class="action-btn">▶</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">🎵</span>
+    <p class="empty-title">No songs yet</p>
+    <p class="empty-sub">Upload your first song and start earning!</p>
+    <a href="{% url 'music:create_song' %}" class="btn-primary">Upload Song</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- SONGS TAB -->
+<div class="panel-section" id="tab-songs">
+  <div class="page-header">
+    <h2 class="section-title sm">My Songs ({{ songs.count }})</h2>
+    <a href="{% url 'music:create_song' %}" class="btn-primary sm">+ Upload New Song</a>
+  </div>
+  <div class="songs-grid">
+    {% for song in songs %}
+    <div class="song-card">
+      <div class="card-img-wrap">
+        {% if song.cover_image %}<img src="{{ song.cover_image.url }}" class="card-img" alt="">
+        {% else %}<div class="card-img placeholder">🎵</div>{% endif %}
+        <button class="card-play" onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{{ artist.name|escapejs }}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">▶</button>
+      </div>
+      <div class="card-body">
+        <a href="{% url 'music:song_detail' song.pk %}" class="card-title">{{ song.title }}</a>
+        <div class="card-meta">
+          <span>▶ {{ song.play_count }}</span>
+          <span>❤ {{ song.likes.count }}</span>
+          {% if song.is_premium %}<span class="price-tag">৳{{ song.price }}</span>
+          {% else %}<span class="badge free">Free</span>{% endif %}
+        </div>
+        <div class="card-actions">
+          <a href="{% url 'music:update_song' song.pk %}" class="action-btn">✏ Edit</a>
+          <a href="{% url 'music:delete_song' song.pk %}" class="action-btn danger">🗑 Delete</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- EARNINGS TAB -->
+<div class="panel-section" id="tab-earnings">
+  <div class="section-header" style="margin-bottom:24px;">
+    <h2 class="section-title sm">💰 Earnings Breakdown</h2>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
+    <div class="payout-card">
+      <h3 style="font-size:16px;font-weight:900;margin-bottom:16px;">🎵 Streaming Revenue</h3>
+      <div style="font-size:36px;font-weight:900;color:var(--green);margin-bottom:8px;">৳{{ stream_earnings|floatformat:2 }}</div>
+      <p style="color:var(--gray);font-size:13px;margin-bottom:16px;">Based on {{ total_plays }} plays at ৳0.50 per 1,000</p>
+      {% for song in songs|slice:":5" %}
+      <div class="royalty-row">
+        <span>{{ song.title|truncatechars:20 }}</span>
+        <span style="color:var(--green);">৳{% widthratio song.play_count 2000 1 %}</span>
+      </div>
+      <div class="royalty-bar-wrap">
+        <div class="royalty-bar-bg">
+          <div class="royalty-bar-fill" style="width:{% if total_plays > 0 %}{% widthratio song.play_count total_plays 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="payout-card">
+      <h3 style="font-size:16px;font-weight:900;margin-bottom:16px;">💿 Song Sales</h3>
+      <div style="font-size:36px;font-weight:900;color:#f4c430;margin-bottom:8px;">৳{{ total_earned|floatformat:2 }}</div>
+      <p style="color:var(--gray);font-size:13px;margin-bottom:16px;">{{ total_sales }} premium song{{ total_sales|pluralize }} sold</p>
+      {% for song in premium_songs %}
+      <div class="royalty-row" style="margin-bottom:6px;">
+        <span>{{ song.title|truncatechars:18 }}</span>
+        <span style="color:#f4c430;">{{ song.purchases.count }} × ৳{{ song.price }}</span>
+      </div>
+      {% empty %}
+      <p style="color:var(--gray);font-size:13px;">No premium songs yet. Set a price on a song to start selling!</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="payout-card" style="max-width:500px;">
+    <h3 style="font-size:16px;font-weight:900;margin-bottom:12px;">🏦 Payout Information</h3>
+    <p style="color:var(--gray);font-size:13px;line-height:1.7;margin-bottom:16px;">
+      Earnings are processed at the end of each month. Streaming revenue is calculated at <strong style="color:var(--white);">৳0.50 per 1,000 plays</strong>. Song sale revenue is <strong style="color:var(--white);">80% to you</strong>, 20% platform fee.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:12px 16px;flex:1;min-width:120px;text-align:center;">
+        <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Total Lifetime</div>
+        <div style="font-size:20px;font-weight:900;color:var(--green);">৳{{ estimated_earnings|floatformat:2 }}</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:12px 16px;flex:1;min-width:120px;text-align:center;">
+        <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">This Month</div>
+        <div style="font-size:20px;font-weight:900;color:#f4c430;">৳{{ monthly_stream_earn|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD TAB -->
+<div class="panel-section" id="tab-upload">
+  <div class="section-header"><h2 class="section-title sm">⬆ Upload a Song</h2></div>
+  <p style="color:var(--gray);font-size:14px;margin-bottom:24px;">Only artists can upload songs. Fill in the details below.</p>
+  <a href="{% url 'music:create_song' %}" class="btn-primary" style="margin-bottom:32px;display:inline-flex;">Go to Upload Form →</a>
+
+  <div style="background:var(--bg2);border-radius:var(--radius-xl);padding:24px;max-width:480px;">
+    <h3 style="font-weight:900;margin-bottom:16px;">💡 Upload Tips</h3>
+    <ul class="feature-checklist">
+      <li>Use high-quality audio (MP3 320kbps or WAV)</li>
+      <li>Add a cover image for more plays</li>
+      <li>Tag your genres to reach the right audience</li>
+      <li>Set a price to sell your song as premium</li>
+      <li>Write a compelling song title</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function showTab(name, btn){
+  document.querySelectorAll('.panel-section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.panel-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+{% endblock %}

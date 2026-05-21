@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Delete Song — GaanHub{% endblock %}
+{% block content %}
+<div class="form-page">
+    <h1>Delete Song</h1>
+    <p>Are you sure you want to delete <strong>"{{ song.title }}"</strong>? This cannot be undone.</p>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button type="submit" class="btn-primary danger">Yes, Delete</button>
+            <a href="{% url 'music:artist_panel' %}" class="btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

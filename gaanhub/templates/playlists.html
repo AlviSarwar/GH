@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}My Playlists — GaanHub{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>🎵 My Playlists</h1>
+</div>
+
+<!-- Create Playlist Form -->
+<div class="create-playlist-box">
+    <form method="POST" class="create-playlist-form">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="New playlist name..." class="playlist-name-input" required maxlength="255">
+        <button type="submit" class="btn-primary">+ Create</button>
+    </form>
+</div>
+
+{% if playlists %}
+<div class="playlists-grid">
+    {% for pl in playlists %}
+    <div class="playlist-card">
+        <a href="{% url 'music:playlist_detail' pl.pk %}" class="playlist-cover-link">
+            <div class="playlist-cover">
+                {% with first=pl.songs.all|first %}
+                    {% if first and first.cover_image %}
+                        <img src="{{ first.cover_image.url }}" alt="">
+                    {% else %}
+                        <span class="playlist-emoji">📋</span>
+                    {% endif %}
+                {% endwith %}
+                <div class="playlist-count">{{ pl.songs.count }} song{{ pl.songs.count|pluralize }}</div>
+            </div>
+        </a>
+        <div class="playlist-info">
+            <a href="{% url 'music:playlist_detail' pl.pk %}" class="playlist-title">{{ pl.name }}</a>
+            <div class="playlist-actions">
+                <form method="POST" action="{% url 'music:delete_playlist' pl.pk %}" onsubmit="return confirm('Delete \'{{ pl.name }}\'?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-icon danger" title="Delete playlist">🗑</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>You have no playlists yet. Create one above! 🎶</p>
+</div>
+{% endif %}
+{% endblock %}

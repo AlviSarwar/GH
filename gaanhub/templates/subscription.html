@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}GaanHub Premium — Plans{% endblock %}
+{% block content %}
+<style>
+.sub-hero {
+  text-align: center;
+  padding: 48px 24px 32px;
+  background: linear-gradient(180deg, #1a1a2e 0%, transparent 100%);
+  border-radius: 12px;
+  margin-bottom: 40px;
+}
+.sub-hero h1 { font-size: 2.6rem; font-weight: 900; margin-bottom: 12px; }
+.sub-hero h1 span { background: linear-gradient(135deg,#f4c430,#e8a000); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.sub-hero p { color: var(--gray); font-size: 1.1rem; max-width: 500px; margin: 0 auto; }
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+.plan-card {
+  background: var(--bg2);
+  border: 2px solid var(--bg3);
+  border-radius: 16px;
+  padding: 32px 28px;
+  position: relative;
+  transition: transform .2s, border-color .2s;
+}
+.plan-card:hover { transform: translateY(-4px); }
+.plan-card.popular {
+  border-color: #f4c430;
+  background: linear-gradient(180deg, #1a150500 0%, var(--bg2) 100%);
+}
+.plan-popular-badge {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg,#f4c430,#e8a000);
+  color: #000; font-size: 11px; font-weight: 800;
+  padding: 4px 16px; border-radius: 20px; letter-spacing: .5px; white-space: nowrap;
+}
+.plan-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.plan-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+.plan-price { font-size: 2.4rem; font-weight: 900; margin: 12px 0 4px; }
+.plan-price span { font-size: 1rem; font-weight: 400; color: var(--gray); }
+.plan-features { list-style: none; padding: 0; margin: 20px 0 28px; }
+.plan-features li { padding: 6px 0; font-size: .95rem; color: var(--gray2); display: flex; align-items: center; gap: 8px; }
+.plan-features li::before { content: '✓'; color: #1DB954; font-weight: 800; }
+.plan-btn {
+  display: block; text-align: center; width: 100%;
+  padding: 14px; border-radius: 50px; font-weight: 800; font-size: 1rem;
+  text-decoration: none; cursor: pointer; border: none; transition: opacity .15s;
+}
+.plan-btn:hover { opacity: .85; }
+.plan-btn.gold { background: linear-gradient(135deg,#f4c430,#e8a000); color: #000; }
+.plan-btn.outline { background: transparent; border: 2px solid var(--gray); color: var(--white); }
+
+.sub-features-section { margin-bottom: 48px; }
+.sub-features-section h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 24px; text-align: center; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.feature-card {
+  background: var(--bg2); border-radius: 12px; padding: 24px 20px; text-align: center;
+}
+.feature-card .f-icon { font-size: 2rem; margin-bottom: 10px; }
+.feature-card .f-title { font-weight: 700; margin-bottom: 6px; }
+.feature-card .f-desc { font-size: .85rem; color: var(--gray); }
+
+.current-sub-banner {
+  background: linear-gradient(135deg, #1a1500, #2a2000);
+  border: 2px solid #f4c430;
+  border-radius: 12px; padding: 20px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+}
+.current-sub-banner .csb-info { font-size: 1rem; }
+.current-sub-banner .csb-info strong { color: #f4c430; }
+</style>
+
+{% if subscription and subscription.is_active %}
+<div class="current-sub-banner">
+  <div>
+    <div class="csb-info">⭐ You're on <strong>GaanHub {{ subscription.get_plan_display }} Premium</strong></div>
+    <div style="color:var(--gray);font-size:.875rem;margin-top:4px;">{{ subscription.days_remaining }} days remaining · Expires {{ subscription.expires_at|date:"M d, Y" }}</div>
+  </div>
+  <a href="{% url 'music:subscription_dashboard' %}" class="btn-outline" style="border-radius:50px;padding:8px 20px;">Manage</a>
+</div>
+{% endif %}
+
+<div class="sub-hero">
+  <h1>Music without limits<br>with <span>GaanHub Premium</span></h1>
+  <p>Ad-free, high-quality audio, unlimited skips, and access to exclusive content — starting at ৳99/month.</p>
+</div>
+
+<div class="plans-grid">
+  {% for plan_id, plan in plans.items %}
+  <div class="plan-card {% if plan.popular %}popular{% endif %}">
+    {% if plan.popular %}<div class="plan-popular-badge">🔥 Most Popular</div>{% endif %}
+    <div class="plan-icon">{{ plan.icon }}</div>
+    <div class="plan-name">{{ plan.name }}</div>
+    <div style="color:var(--gray);font-size:.85rem;">per month</div>
+    <div class="plan-price">৳{{ plan.price }}<span>/mo</span></div>
+    <ul class="plan-features">
+      {% for feature in plan.features %}
+      <li>{{ feature }}</li>
+      {% endfor %}
+    </ul>
+    {% if subscription and subscription.is_active and subscription.plan == plan_id %}
+      <div class="plan-btn" style="background:var(--bg3);color:var(--gray);cursor:default;">✓ Current Plan</div>
+    {% else %}
+      <a href="{% url 'music:subscribe' plan_id %}" class="plan-btn {% if plan.popular %}gold{% else %}outline{% endif %}">
+        Get {{ plan.name }}
+      </a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="sub-features-section">
+  <h2>What you get with Premium</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="f-icon">🚫</div>
+      <div class="f-title">Ad-free</div>
+      <div class="f-desc">Listen without interruptions</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">🎚️</div>
+      <div class="f-title">High Quality</div>
+      <div class="f-desc">320kbps crystal clear audio</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">⏭️</div>
+      <div class="f-title">Unlimited Skips</div>
+      <div class="f-desc">Skip as much as you want</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">🔒</div>
+      <div class="f-title">Premium Songs</div>
+      <div class="f-desc">Access exclusive premium tracks</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">📲</div>
+      <div class="f-title">Offline Mode</div>
+      <div class="f-desc">Download & play offline</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-icon">🎤</div>
+      <div class="f-title">Artist Support</div>
+      <div class="f-desc">Your subscription supports local artists</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}{{ title|default:"Upload Song" }} — GaanHub{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">{{ title|default:"🎵 Upload Song" }}</h1>
+  {% if request.user.artist %}
+  <span class="artist-tier {% if request.user.artist.songs.count >= 20 %}superstar{% elif request.user.artist.songs.count >= 5 %}established{% else %}rising{% endif %}">
+    🎤 {{ request.user.artist.name }}
+  </span>
+  {% endif %}
+</div>
+
+{% if not request.user.artist %}
+<div class="become-artist-cta" style="max-width:100%;margin:0 0 32px;">
+  <div class="become-artist-icon">🔒</div>
+  <h2 class="become-artist-title">Artist Account Required</h2>
+  <p class="become-artist-sub">Only artists can upload songs. Create your artist profile first — it's free and takes 30 seconds.</p>
+  <a href="{% url 'music:become_artist' %}" class="btn-primary">Become an Artist →</a>
+</div>
+{% else %}
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;">
+  <div class="form-card" style="max-width:100%;">
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="alert alert-danger" style="margin-bottom:20px;">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}<div>{{ field }}: {{ error }}</div>{% endfor %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label">Song Title *</label>
+        <input type="text" name="title" class="form-input" placeholder="Enter song title" required value="{{ form.title.value|default:'' }}">
+      </div>
+
+      <!-- Audio file drag-drop zone -->
+      <div class="form-group">
+        <label class="form-label">Audio File * (MP3, WAV, OGG)</label>
+        <div class="dropzone" id="audioDropzone" onclick="document.getElementById('audioInput').click()">
+          <div class="dropzone-icon">🎵</div>
+          <div class="dropzone-text" id="audioDropText">Drag &amp; drop audio file here</div>
+          <div class="dropzone-sub">or click to browse — MP3, WAV, OGG up to 50MB</div>
+          <input type="file" name="audio_file" id="audioInput" accept="audio/*" required onchange="onAudioSelect(this)">
+        </div>
+        <div class="upload-progress" id="audioProgress">
+          <div class="upload-progress-bar"><div class="upload-progress-fill" id="audioProgressFill"></div></div>
+          <div class="upload-progress-text" id="audioProgressText">Uploading…</div>
+        </div>
+      </div>
+
+      <!-- Cover image drag-drop zone -->
+      <div class="form-group">
+        <label class="form-label">Cover Image (optional)</label>
+        <div class="dropzone" id="coverDropzone" onclick="document.getElementById('coverInput').click()">
+          <div class="dropzone-icon" id="coverPreviewIcon">🖼</div>
+          <div class="dropzone-text">Drag &amp; drop cover image</div>
+          <div class="dropzone-sub">JPG, PNG, WebP — 1:1 ratio recommended</div>
+          <input type="file" name="cover_image" id="coverInput" accept="image/*" onchange="onCoverSelect(this)">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group">
+          <label class="form-label">Artist</label>
+          {{ form.artist }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Album (optional)</label>
+          {{ form.album }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Genres</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          {% for choice in form.genres %}
+          <label style="display:flex;align-items:center;gap:6px;background:var(--bg3);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:13px;">
+            {{ choice.tag }} {{ choice.choice_label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <hr class="divider">
+      <h3 style="font-weight:900;margin-bottom:16px;">💰 Monetisation</h3>
+
+      <div class="form-group" style="display:flex;align-items:center;gap:12px;">
+        <input type="checkbox" name="is_premium" id="isPremium" {% if form.is_premium.value %}checked{% endif %} onchange="togglePriceField()" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer;">
+        <label for="isPremium" style="font-size:14px;font-weight:700;cursor:pointer;">
+          Set as Premium (paid song) <span class="price-tag" style="margin-left:6px;">💰 Earn from sales</span>
+        </label>
+      </div>
+
+      <div class="form-group" id="priceField" style="display:{% if form.is_premium.value %}block{% else %}none{% endif %};">
+        <label class="form-label">Price (৳ BDT)</label>
+        <input type="number" name="price" class="form-input" min="10" max="999" step="1" placeholder="e.g. 49" value="{{ form.price.value|default:'49' }}" style="max-width:200px;">
+        <div class="field-help">Minimum ৳10 · You keep 80% of each sale</div>
+      </div>
+
+      <div class="form-row">
+        <button type="submit" class="btn-primary" id="submitBtn">🎵 {{ title|default:"Upload Song" }}</button>
+        <a href="{% url 'music:artist_panel' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Sidebar tips -->
+  <div>
+    <div style="background:var(--bg2);border-radius:var(--radius-xl);padding:24px;margin-bottom:20px;">
+      <h3 style="font-weight:900;margin-bottom:16px;">💡 Upload Tips</h3>
+      <ul class="feature-checklist" style="margin:0;">
+        <li>320kbps MP3 for best quality</li>
+        <li>Square cover art (1000×1000px)</li>
+        <li>Add genres to get discovered</li>
+        <li>Premium = you earn from sales</li>
+        <li>Free = more plays = more streams</li>
+      </ul>
+    </div>
+    <div style="background:linear-gradient(135deg,#0d2d1a,#1a3a2a);border-radius:var(--radius-xl);padding:20px;border:1px solid rgba(29,185,84,.2);">
+      <div style="font-size:24px;margin-bottom:8px;">💰</div>
+      <div style="font-weight:900;margin-bottom:4px;">Earn from every play</div>
+      <div style="font-size:13px;color:var(--gray);">৳0.50 per 1,000 streams + 80% of premium song sales go directly to you.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePriceField(){
+  document.getElementById('priceField').style.display = document.getElementById('isPremium').checked ? 'block' : 'none';
+}
+function onAudioSelect(input){
+  if(input.files[0]){
+    document.getElementById('audioDropText').textContent = '✓ ' + input.files[0].name;
+    document.getElementById('audioDropzone').style.borderColor = 'var(--green)';
+  }
+}
+function onCoverSelect(input){
+  if(input.files[0]){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      document.getElementById('coverPreviewIcon').innerHTML = '<img src="'+e.target.result+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;">';
+      document.getElementById('coverDropzone').style.borderColor = 'var(--green)';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+// Drag-and-drop
+['audioDropzone','coverDropzone'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('dragover', function(e){ e.preventDefault(); el.classList.add('dragover'); });
+  el.addEventListener('dragleave', function(){ el.classList.remove('dragover'); });
+  el.addEventListener('drop', function(e){
+    e.preventDefault(); el.classList.remove('dragover');
+    var input = el.querySelector('input[type=file]');
+    if(e.dataTransfer.files.length){ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); }
+  });
+});
+// Style select inputs
+document.querySelectorAll('select').forEach(function(s){ s.classList.add('form-input'); });
+</script>
+{% endif %}
+{% endblock %}

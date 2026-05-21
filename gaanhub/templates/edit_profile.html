@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile — GaanHub{% endblock %}
+{% block content %}
+<div class="form-page">
+    <h1>✏ Edit Profile</h1>
+    <form method="POST" class="gaanhub-form">
+        {% csrf_token %}
+        <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ request.user.email }}" placeholder="your@email.com">
+        </div>
+        <div class="field">
+            <label>Bio <span class="field-hint">(max 300 chars)</span></label>
+            <textarea name="bio" rows="3" placeholder="Tell people about yourself..." maxlength="300">{{ profile.bio }}</textarea>
+        </div>
+        <div class="field">
+            <label>Avatar Colour</label>
+            <div class="color-picker-row">
+                <input type="color" name="avatar_color" value="{{ profile.avatar_color }}" id="colorInput">
+                <div class="avatar-preview" id="avatarPreview" style="background:{{ profile.avatar_color }}">
+                    {{ request.user.username|first|upper }}
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <a href="{% url 'music:my_profile' %}" class="btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+<script>
+document.getElementById('colorInput').addEventListener('input', function() {
+    document.getElementById('avatarPreview').style.background = this.value;
+});
+</script>
+{% endblock %}

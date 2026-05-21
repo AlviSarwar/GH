@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}My Premium — GaanHub{% endblock %}
+{% block content %}
+<style>
+.sub-dash { max-width: 680px; margin: 0 auto; }
+.sub-dash h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 28px; }
+
+.sub-status-card {
+  border-radius: 20px; padding: 32px;
+  margin-bottom: 24px; position: relative; overflow: hidden;
+}
+.sub-status-card.active {
+  background: linear-gradient(135deg, #1a1500 0%, #2a2400 50%, var(--bg2) 100%);
+  border: 2px solid #f4c430;
+}
+.sub-status-card.inactive {
+  background: var(--bg2); border: 2px solid var(--bg3);
+}
+.sub-glow {
+  position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, #f4c43033 0%, transparent 70%);
+  pointer-events: none;
+}
+.sub-plan-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.sub-plan-icon { font-size: 2.8rem; }
+.sub-plan-name { font-size: 1.6rem; font-weight: 900; }
+.sub-plan-badge { display: inline-block; background: linear-gradient(135deg,#f4c430,#e8a000); color:#000; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+.sub-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0; }
+.sub-stat { background: rgba(255,255,255,.05); border-radius: 10px; padding: 14px 16px; text-align: center; }
+.sub-stat .stat-val { font-size: 1.6rem; font-weight: 900; color: #f4c430; }
+.sub-stat .stat-label { font-size: .75rem; color: var(--gray); margin-top: 2px; }
+.sub-progress-bar {
+  height: 6px; background: var(--bg3); border-radius: 3px; margin: 16px 0 8px; overflow: hidden;
+}
+.sub-progress-fill { height: 100%; background: linear-gradient(90deg,#f4c430,#e8a000); border-radius: 3px; }
+.sub-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+.perks-card { background: var(--bg2); border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; }
+.perks-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
+.perk-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bg3); }
+.perk-item:last-child { border-bottom: none; }
+.perk-item .perk-icon { font-size: 1.2rem; width: 28px; text-align: center; }
+.perk-item .perk-text { font-size: .9rem; }
+.perk-item .perk-check { margin-left: auto; color: #1DB954; font-weight: 800; }
+</style>
+
+<div class="sub-dash">
+  <h1>⭐ My Premium</h1>
+
+  {% if subscription and subscription.is_active %}
+  <div class="sub-status-card active">
+    <div class="sub-glow"></div>
+    <div class="sub-plan-row">
+      <div class="sub-plan-icon">
+        {% if subscription.plan == 'individual' %}🎧{% elif subscription.plan == 'student' %}🎓{% else %}👨‍👩‍👧‍👦{% endif %}
+      </div>
+      <div>
+        <div class="sub-plan-name">{{ subscription.get_plan_display }} Premium</div>
+        <span class="sub-plan-badge">✓ Active</span>
+      </div>
+    </div>
+
+    <div class="sub-stats">
+      <div class="sub-stat">
+        <div class="stat-val">{{ subscription.days_remaining }}</div>
+        <div class="stat-label">Days Left</div>
+      </div>
+      <div class="sub-stat">
+        <div class="stat-val">৳{{ subscription.amount_paid }}</div>
+        <div class="stat-label">Paid</div>
+      </div>
+      <div class="sub-stat">
+        <div class="stat-val">30</div>
+        <div class="stat-label">Days Total</div>
+      </div>
+    </div>
+
+    <div style="font-size:.85rem;color:var(--gray);margin-bottom:4px;">Subscription progress</div>
+    <div class="sub-progress-bar">
+      <div class="sub-progress-fill" style="width: {{ subscription.days_remaining|floatformat:0 }}%;"></div>
+    </div>
+    <div style="font-size:.8rem;color:var(--gray);">Expires {{ subscription.expires_at|date:"F d, Y" }}</div>
+
+    <div class="sub-actions">
+      <a href="{% url 'music:subscription_plans' %}" class="btn-primary" style="border-radius:50px;padding:10px 24px;">↑ Change Plan</a>
+      {% if subscription.status == 'active' %}
+      <form method="post" action="{% url 'music:cancel_subscription' %}" style="margin:0;" onsubmit="return confirm('Are you sure you want to cancel? You keep Premium until expiry.')">
+        {% csrf_token %}
+        <button type="submit" class="btn-outline" style="border-radius:50px;padding:10px 20px;color:#ff6b6b;border-color:#ff6b6b;">Cancel Plan</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="perks-card">
+    <h3>Your Premium Perks</h3>
+    <div class="perk-item"><span class="perk-icon">🚫</span><span class="perk-text">Ad-free listening</span><span class="perk-check">✓</span></div>
+    <div class="perk-item"><span class="perk-icon">🎚️</span><span class="perk-text">High quality audio (320kbps)</span><span class="perk-check">✓</span></div>
+    <div class="perk-item"><span class="perk-icon">⏭️</span><span class="perk-text">Unlimited skips</span><span class="perk-check">✓</span></div>
+    <div class="perk-item"><span class="perk-icon">🔒</span><span class="perk-text">Access to all premium songs</span><span class="perk-check">✓</span></div>
+    <div class="perk-item"><span class="perk-icon">📲</span><span class="perk-text">Offline playback (coming soon)</span><span class="perk-check" style="color:var(--gray)">⏳</span></div>
+  </div>
+
+  {% else %}
+  <div class="sub-status-card inactive">
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:3rem;margin-bottom:16px;">🎧</div>
+      <h2 style="margin-bottom:8px;">You're on the Free plan</h2>
+      <p style="color:var(--gray);margin-bottom:24px;">Upgrade to Premium for ad-free listening, high-quality audio, and more.</p>
+      <a href="{% url 'music:subscription_plans' %}" class="btn-primary" style="border-radius:50px;padding:14px 36px;font-weight:800;background:linear-gradient(135deg,#f4c430,#e8a000);color:#000;text-decoration:none;">
+        ⭐ Upgrade to Premium
+      </a>
+    </div>
+  </div>
+  {% if subscription and subscription.status == 'cancelled' %}
+  <div style="background:var(--bg2);border-radius:12px;padding:16px 20px;color:var(--gray);font-size:.9rem;">
+    Your previous {{ subscription.get_plan_display }} subscription was cancelled and expired on {{ subscription.expires_at|date:"M d, Y" }}.
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

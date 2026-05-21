@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}{{ playlist.name }} — GaanHub{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>📋 {{ playlist.name }}</h1>
+    <a href="{% url 'music:playlists' %}" class="btn-outline small">← All Playlists</a>
+</div>
+
+{% if playlist.songs.all %}
+<div class="songs-table-wrap">
+    <table class="song-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Song</th>
+                <th>Artist</th>
+                <th>Play</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in playlist.songs.all %}
+            <tr>
+                <td class="song-num">{{ forloop.counter }}</td>
+                <td>
+                    <div class="table-song">
+                        {% if song.cover_image %}
+                            <img src="{{ song.cover_image.url }}" class="table-thumb" alt="">
+                        {% else %}
+                            <span class="table-thumb-placeholder">🎵</span>
+                        {% endif %}
+                        <a href="{% url 'music:song_detail' song.pk %}">{{ song.title }}</a>
+                    </div>
+                </td>
+                <td>{{ song.artist.name|default:"Unknown" }}</td>
+                <td>
+                    <button class="btn-primary small" onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">▶ Play</button>
+                </td>
+                <td>
+                    <form method="POST" action="{% url 'music:remove_from_playlist' playlist.pk song.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon danger">🗑</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div style="margin-top:16px;">
+    <button class="btn-primary" onclick="playAll()">▶ Play All</button>
+</div>
+
+<script>
+const playlistSongs = [
+    {% for song in playlist.songs.all %}
+    {url:'{{ song.audio_file.url }}', title:'{{ song.title|escapejs }}', artist:'{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}', cover:'{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}', id:{{ song.pk }}},
+    {% endfor %}
+];
+function playAll(){
+    playlist = playlistSongs;
+    currentIndex = 0;
+    playCurrent();
+}
+</script>
+{% else %}
+<div class="empty-state">
+    <p>This playlist is empty. <a href="{% url 'music:home' %}">Browse songs →</a></p>
+</div>
+{% endif %}
+{% endblock %}

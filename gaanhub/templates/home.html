@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}GaanHub — Home{% endblock %}
+{% block content %}
+
+<div class="home-header">
+  <h1 class="home-title">
+    {% if request.user.is_authenticated %}
+      Good {% now "H" as hour %}{% if hour < "12" %}morning{% elif hour < "18" %}afternoon{% else %}evening{% endif %}, {{ request.user.username }} 👋
+    {% else %}
+      Welcome to GaanHub 🎵
+    {% endif %}
+  </h1>
+  <form method="GET" class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" name="q" placeholder="Search songs or artists…" value="{{ query }}">
+  </form>
+</div>
+
+<!-- Quick-play recent (top 6) -->
+{% if songs %}
+<section class="home-section">
+  <h2 class="section-title">🎵 All Songs</h2>
+  {% if request.user.is_authenticated %}
+  <div class="home-actions">
+    <button class="btn-primary sm" onclick="playAllFree()">▶ Play Free Songs</button>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
+<div class="songs-grid" id="songsContainer">
+  {% for song in songs %}
+  <div class="song-card">
+    <div class="card-img-wrap">
+      {% if song.cover_image %}
+        <img src="{{ song.cover_image.url }}" class="card-img" alt="{{ song.title }}">
+      {% else %}
+        <div class="card-img placeholder">🎵</div>
+      {% endif %}
+
+      {% if song.is_premium %}
+        {# Determine access for this card #}
+        {% if is_premium or song.pk|stringformat:"s" in purchased_ids|join:"," %}
+          {# user has premium sub OR bought this song — show play #}
+          <button class="card-play"
+            onclick="event.stopPropagation();playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">▶</button>
+        {% else %}
+          <a href="{% url 'music:song_detail' song.pk %}" class="card-play premium-lock" title="Premium — click to unlock">🔒</a>
+        {% endif %}
+      {% else %}
+        <button class="card-play"
+          onclick="event.stopPropagation();playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">▶</button>
+      {% endif %}
+    </div>
+
+    <div class="card-body">
+      <a href="{% url 'music:song_detail' song.pk %}" class="card-title">{{ song.title }}</a>
+      {% if song.artist %}
+        <a href="{% url 'music:artist_page' song.artist.pk %}" class="card-artist">{{ song.artist.name }}</a>
+      {% else %}
+        <span class="card-artist">Unknown</span>
+      {% endif %}
+      <div class="card-meta">
+        <span>▶ {{ song.play_count }}</span>
+        <span>❤ {{ song.likes.count }}</span>
+        {% if song.is_premium %}
+          <span class="badge premium">৳{{ song.price }}</span>
+        {% else %}
+          <span class="badge free">Free</span>
+        {% endif %}
+      </div>
+
+      {% if request.user.is_authenticated %}
+      <div class="card-actions">
+        <a href="{% url 'music:like_song' song.pk %}" class="action-btn">❤</a>
+        <a href="{% url 'music:add_to_playlist' song.id %}" class="action-btn">+</a>
+        {% if song.is_premium %}
+          {% if song.pk in purchased_ids %}
+            <a href="{% url 'music:download_song' song.pk %}" class="action-btn" title="Download">⬇</a>
+          {% else %}
+            <a href="{% url 'music:buy_song' song.pk %}" class="action-btn buy" title="Buy song">🛒</a>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state"><span class="empty-icon">🔍</span><p>No songs found.</p></div>
+  {% endfor %}
+</div>
+
+<script>
+var allSongs = [{% for s in songs %}{% if not s.is_premium %}{url:'{{ s.audio_file.url }}',title:'{{ s.title|escapejs }}',artist:'{% if s.artist %}{{ s.artist.name|escapejs }}{% endif %}',cover:'{% if s.cover_image %}{{ s.cover_image.url }}{% endif %}',id:{{ s.pk }}},{% endif %}{% endfor %}];
+function playAllFree(){ if(!allSongs.length){ alert('No free songs available.'); return; } playlist=allSongs; currentIndex=0; playCurrent(); }
+</script>
+{% endblock %}

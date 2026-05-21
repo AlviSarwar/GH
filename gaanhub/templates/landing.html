@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GaanHub — Music for Everyone</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body { margin: 0; background: #000; }
+        .landing { min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── HERO ── */
+        .hero {
+            flex: 1;
+            background: linear-gradient(180deg, #1a1a2e 0%, #121212 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 24px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -80px; left: 50%;
+            transform: translateX(-50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(29,185,84,.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .hero-brand {
+            font-size: 52px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -2px;
+            margin-bottom: 12px;
+            line-height: 1;
+            position: relative;
+        }
+        .hero-brand span { color: #1DB954; }
+        .hero-tagline {
+            font-size: 18px;
+            color: #B3B3B3;
+            max-width: 480px;
+            line-height: 1.6;
+            margin-bottom: 48px;
+            position: relative;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+        }
+        .cta-primary {
+            background: #1DB954;
+            color: #000;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: transform .15s, background .15s;
+            letter-spacing: .3px;
+        }
+        .cta-primary:hover { background: #1ed760; transform: scale(1.03); }
+        .cta-secondary {
+            background: transparent;
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: 2px solid #fff;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .cta-secondary:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+        /* ── FEATURES ── */
+        .features {
+            background: #121212;
+            padding: 64px 24px;
+        }
+        .features-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .features-title {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 40px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: #181818;
+            border-radius: 12px;
+            padding: 28px 24px;
+            border: 1px solid #282828;
+        }
+        .feature-icon { font-size: 32px; margin-bottom: 14px; }
+        .feature-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .feature-desc { font-size: 13px; color: #B3B3B3; line-height: 1.6; }
+
+        /* ── NAV ── */
+        .top-nav {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px;
+        }
+        .nav-logo { font-size: 20px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 12px; }
+
+        /* ── FOOTER ── */
+        .footer {
+            background: #000;
+            text-align: center;
+            padding: 24px;
+            color: #535353;
+            font-size: 12px;
+        }
+        .footer a { color: #535353; }
+        .footer a:hover { color: #B3B3B3; }
+    </style>
+</head>
+<body>
+<div class="landing">
+
+    <!-- HERO -->
+    <section class="hero">
+        <nav class="top-nav">
+            <div class="nav-logo">🎵 GaanHub</div>
+            <div class="nav-links">
+                <a href="{% url 'login' %}" class="cta-secondary" style="padding:10px 24px;font-size:13px;">Log in</a>
+                <a href="{% url 'users:register' %}" class="cta-primary" style="padding:10px 24px;font-size:13px;">Sign up free</a>
+            </div>
+        </nav>
+
+        <div class="hero-logo">🎧</div>
+        <h1 class="hero-brand">Gaan<span>Hub</span></h1>
+        <p class="hero-tagline">Bangladesh's own music streaming platform. Discover local artists, stream unlimited music, and share your sound with the world.</p>
+
+        <div class="hero-actions">
+            <a href="{% url 'users:register' %}" class="cta-primary">Get started free</a>
+            <a href="{% url 'login' %}" class="cta-secondary">Log in</a>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features">
+        <div class="features-inner">
+            <h2 class="features-title">Everything you need</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <p class="feature-title">Stream Music</p>
+                    <p class="feature-desc">Listen to thousands of songs from local and international artists, anytime you want.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎙</div>
+                    <p class="feature-title">Become an Artist</p>
+                    <p class="feature-desc">Upload your music, grow your fanbase, and earn from premium song purchases.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <p class="feature-title">Build Playlists</p>
+                    <p class="feature-desc">Curate your perfect playlist and take your favourite songs everywhere.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💳</div>
+                    <p class="feature-title">Support Artists</p>
+                    <p class="feature-desc">Purchase premium tracks directly. Artists earn 70% of every sale.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>© 2026 GaanHub · Made in Bangladesh 🇧🇩 · <a href="{% url 'login' %}">Login</a> · <a href="{% url 'users:register' %}">Sign up</a></p>
+    </footer>
+
+</div>
+</body>
+</html>

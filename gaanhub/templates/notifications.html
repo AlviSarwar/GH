@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Notifications — GaanHub{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>🔔 Notifications</h1>
+</div>
+
+{% if notifs %}
+<div class="notif-list">
+    {% for n in notifs %}
+    <div class="notif-item {% if not n.is_read %}unread{% endif %}">
+        <span class="notif-dot"></span>
+        <div class="notif-body">
+            {% if n.link %}
+                <a href="{{ n.link }}" class="notif-msg">{{ n.message }}</a>
+            {% else %}
+                <span class="notif-msg">{{ n.message }}</span>
+            {% endif %}
+            <span class="notif-time">{{ n.created_at|timesince }} ago</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No notifications yet. Follow some artists to get updates! 🎵</p>
+</div>
+{% endif %}
+{% endblock %}

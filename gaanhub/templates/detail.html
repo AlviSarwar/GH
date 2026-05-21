@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}{{ song.title }} — GaanHub{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div class="hero" style="--hero-bg:#3d3d3d;">
+  <div>
+    {% if song.cover_image %}
+      <img src="{{ song.cover_image.url }}" class="hero-cover" alt="{{ song.title }}">
+    {% else %}
+      <div class="hero-cover-placeholder">🎵</div>
+    {% endif %}
+  </div>
+  <div class="hero-info">
+    <p class="hero-type">Song</p>
+    <h1 class="hero-title{% if song.title|length > 20 %} sm{% endif %}">{{ song.title }}</h1>
+    <p class="hero-meta">
+      {% if song.artist %}<strong><a href="{% url 'music:artist_page' song.artist.pk %}" class="artist-link">{{ song.artist.name }}</a></strong>{% endif %}
+      {% if song.album %} · {{ song.album.title }}{% endif %}
+      · <span id="likeCount">{{ song.likes.count }}</span> likes · {{ song.play_count }} plays
+      {% if song.is_premium %}
+        · <span class="badge premium">৳{{ song.price }}</span>
+        {% if can_play and purchased %}<span class="badge owned">✓ Owned</span>
+        {% elif can_play and is_premium_user %}<span class="badge streaming">Premium Stream</span>
+        {% endif %}
+      {% else %}
+        · <span class="badge free">Free</span>
+      {% endif %}
+    </p>
+    {% if song.genres.all %}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+      {% for g in song.genres.all %}
+        <a href="{% url 'music:genre_songs' g.pk %}" class="genre-pill">{{ g.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ── ACCESS GATE BANNER ── -->
+{% if song.is_premium and not can_play %}
+<div class="premium-gate-banner">
+  <div class="gate-icon">🔒</div>
+  <div class="gate-text">
+    <strong>Premium Song</strong>
+    <p>Subscribe to stream all premium songs, or buy this song once to own &amp; download it forever.</p>
+  </div>
+  <div class="gate-actions">
+    {% if request.user.is_authenticated %}
+      <a href="{% url 'music:subscription_plans' %}" class="btn-primary">🎧 Get Premium — from ৳99/mo</a>
+      <a href="{% url 'music:buy_song' song.pk %}" class="btn-outline">Buy for ৳{{ song.price }}</a>
+    {% else %}
+      <a href="{% url 'login' %}?next={{ request.path }}" class="btn-primary">Login to access</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ── SONG ACTIONS ── -->
+<div class="hero-actions">
+
+  {% if song.is_premium %}
+
+    {% if can_play %}
+      <!-- Has access (premium sub OR purchased) -->
+      <button class="btn-primary" id="playBtn"
+        onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">
+        ▶ Play
+      </button>
+
+      {% if can_download %}
+        <!-- Purchased → download available -->
+        <a href="{% url 'music:download_song' song.pk %}" class="btn-outline" title="Download your purchased copy">
+          ⬇ Download
+        </a>
+      {% else %}
+        <!-- Premium sub but not purchased — offer to buy for download -->
+        <a href="{% url 'music:buy_song' song.pk %}" class="btn-outline" title="Buy to download">
+          🛒 Buy to Download · ৳{{ song.price }}
+        </a>
+      {% endif %}
+
+    {% else %}
+      <!-- No access -->
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'music:subscription_plans' %}" class="btn-primary">🎧 Subscribe to Stream</a>
+        <a href="{% url 'music:buy_song' song.pk %}" class="btn-outline">🛒 Buy · ৳{{ song.price }}</a>
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn-primary">🔒 Login to Access</a>
+      {% endif %}
+    {% endif %}
+
+  {% else %}
+    <!-- Free song — always playable -->
+    <button class="btn-primary" id="playBtn"
+      onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">
+      ▶ Play
+    </button>
+  {% endif %}
+
+  {% if request.user.is_authenticated %}
+  <button class="like-btn-lg {% if request.user in song.likes.all %}liked{% endif %}" id="likeBtn" onclick="ajaxLike({{ song.pk }})">
+    {% if request.user in song.likes.all %}❤️{% else %}🤍{% endif %}
+  </button>
+  <a href="{% url 'music:add_to_playlist' song.id %}" class="more-btn" title="Add to playlist">+</a>
+  {% if song.artist %}
+    <a href="{% url 'music:artist_page' song.artist.pk %}" class="btn-outline sm">🎤 Artist</a>
+  {% endif %}
+  {% endif %}
+
+  {% if request.user.is_authenticated and request.user == song.artist.user %}
+    <a href="{% url 'music:update_song' song.pk %}" class="btn-outline sm">✏ Edit</a>
+    <a href="{% url 'music:delete_song' song.pk %}" class="btn-outline sm danger">🗑 Delete</a>
+  {% endif %}
+</div>
+
+<!-- ── PREMIUM INFO STRIPS ── -->
+{% if song.is_premium and can_play and not purchased %}
+<div class="info-strip streaming-strip">
+  🎧 <strong>Streaming via Premium</strong> — You can stream this song anytime.
+  <a href="{% url 'music:buy_song' song.pk %}">Buy for ৳{{ song.price }}</a> to also download it.
+</div>
+{% endif %}
+
+{% if purchased %}
+<div class="info-strip owned-strip">
+  ✅ <strong>You own this song</strong> — Stream and download anytime.
+</div>
+{% endif %}
+
+<!-- ── COMMENTS ── -->
+<div class="comments-section">
+  <h2 class="comments-title">Comments <span class="comment-count">{{ song.comments.count }}</span></h2>
+  {% if request.user.is_authenticated %}
+  <form class="comment-form" onsubmit="submitComment(event, {{ song.pk }})">
+    {% csrf_token %}
+    <div class="comment-input-row">
+      <div class="comment-avatar" style="background:var(--green);">{{ request.user.username|first|upper }}</div>
+      <textarea id="commentText" class="comment-input" placeholder="Add a comment…" maxlength="500" rows="1"></textarea>
+    </div>
+    <div class="comment-form-footer">
+      <span class="char-count" id="charCount">0 / 500</span>
+      <button type="button" onclick="cancelComment()" class="btn-outline xs" id="cancelCommentBtn" style="display:none">Cancel</button>
+      <button type="submit" class="btn-primary xs" id="postCommentBtn" style="display:none">Post</button>
+    </div>
+  </form>
+  {% else %}
+  <p class="comment-login-note"><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
+  {% endif %}
+
+  <div class="comments-list" id="commentsList">
+    {% for comment in song.comments.all %}
+    <div class="comment-item" id="comment-{{ comment.id }}">
+      <div class="comment-avatar" style="background:var(--green);">{{ comment.user.username|first|upper }}</div>
+      <div class="comment-body">
+        <div class="comment-header">
+          <a href="{% url 'music:user_profile' comment.user.username %}" class="comment-author">{{ comment.user.username }}</a>
+          <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+          {% if request.user == comment.user or request.user.is_superuser %}
+          <button class="comment-delete" onclick="deleteComment({{ comment.id }})">✕</button>
+          {% endif %}
+        </div>
+        <p class="comment-text">{{ comment.text }}</p>
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:var(--gray);font-size:14px;padding:16px 0;" id="noComments">No comments yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+.premium-gate-banner{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #3d3d5c;border-radius:12px;padding:24px;margin:24px 0;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.gate-icon{font-size:40px;flex-shrink:0;}
+.gate-text{flex:1;min-width:200px;}
+.gate-text strong{color:#fff;font-size:18px;}
+.gate-text p{color:var(--gray);margin:6px 0 0;font-size:14px;}
+.gate-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.info-strip{padding:12px 20px;border-radius:8px;font-size:14px;margin:16px 0;}
+.streaming-strip{background:rgba(29,185,84,0.1);border:1px solid rgba(29,185,84,0.3);color:#1DB954;}
+.streaming-strip a{color:#1DB954;text-decoration:underline;margin-left:8px;}
+.owned-strip{background:rgba(61,145,244,0.1);border:1px solid rgba(61,145,244,0.3);color:#3D91F4;}
+.badge.owned{background:#3D91F4;color:#fff;padding:3px 8px;border-radius:20px;font-size:11px;margin-left:6px;}
+.badge.streaming{background:rgba(29,185,84,0.2);color:#1DB954;border:1px solid #1DB954;padding:3px 8px;border-radius:20px;font-size:11px;margin-left:6px;}
+</style>
+
+<script>
+function ajaxLike(id){
+  fetch('/music/like/'+id+'/',{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken'),'X-Requested-With':'XMLHttpRequest'}})
+    .then(r=>r.json()).then(d=>{
+      var btn=document.getElementById('likeBtn'),cnt=document.getElementById('likeCount');
+      btn.textContent=d.liked?'❤️':'🤍';
+      btn.classList.toggle('liked',d.liked);
+      cnt.textContent=d.count;
+    });
+}
+document.getElementById('commentText')?.addEventListener('focus',function(){
+  document.getElementById('postCommentBtn').style.display='inline-flex';
+  document.getElementById('cancelCommentBtn').style.display='inline-flex';
+  this.rows=3;
+});
+function cancelComment(){
+  document.getElementById('commentText').value='';
+  document.getElementById('charCount').textContent='0 / 500';
+  document.getElementById('postCommentBtn').style.display='none';
+  document.getElementById('cancelCommentBtn').style.display='none';
+  document.getElementById('commentText').rows=1;
+}
+document.getElementById('commentText')?.addEventListener('input',function(){
+  document.getElementById('charCount').textContent=this.value.length+' / 500';
+});
+function submitComment(e,songId){
+  e.preventDefault();
+  var text=document.getElementById('commentText').value.trim();
+  if(!text)return;
+  fetch('/music/songs/'+songId+'/comment/',{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken'),'X-Requested-With':'XMLHttpRequest','Content-Type':'application/x-www-form-urlencoded'},body:'text='+encodeURIComponent(text)})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){cancelComment();var noC=document.getElementById('noComments');if(noC)noC.remove();
+      document.getElementById('commentsList').insertAdjacentHTML('afterbegin','<div class="comment-item" id="comment-'+d.id+'"><div class="comment-avatar" style="background:var(--green);">'+d.username[0].toUpperCase()+'</div><div class="comment-body"><div class="comment-header"><span class="comment-author">'+d.username+'</span><span class="comment-time">just now</span><button class="comment-delete" onclick="deleteComment('+d.id+')">✕</button></div><p class="comment-text">'+d.text+'</p></div></div>');}
+    });
+}
+function deleteComment(id){
+  if(!confirm('Delete this comment?'))return;
+  fetch('/music/comment/'+id+'/delete/',{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken'),'X-Requested-With':'XMLHttpRequest'}})
+    .then(r=>r.json()).then(d=>{if(d.ok)document.getElementById('comment-'+id).remove();});
+}
+</script>
+{% endblock %}

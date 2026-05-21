@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}My Wallet — GaanHub{% endblock %}
+{% block content %}
+
+<!-- Wallet Hero -->
+<div style="background:linear-gradient(135deg,#0a2a18,#0d3d24,#1a4a2a);border-radius:var(--radius-xl);padding:32px;margin-bottom:28px;position:relative;overflow:hidden;">
+  <div style="position:absolute;right:-20px;top:-20px;font-size:140px;opacity:.06;pointer-events:none;">💰</div>
+  <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(29,185,84,.8);margin-bottom:8px;">Artist Wallet</p>
+  <p style="font-size:13px;color:var(--gray);margin-bottom:4px;">Available Balance</p>
+  <div style="font-size:56px;font-weight:900;color:var(--green);letter-spacing:-2px;line-height:1;">৳{{ wallet.balance|floatformat:2 }}</div>
+  <div style="display:flex;gap:28px;margin-top:20px;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;">Total Earned</div>
+      <div style="font-size:22px;font-weight:900;color:var(--white);">৳{{ wallet.total_earned|floatformat:2 }}</div>
+    </div>
+    <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+    <div>
+      <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;">Withdrawn</div>
+      <div style="font-size:22px;font-weight:900;color:var(--white);">৳{{ wallet.total_withdrawn|floatformat:2 }}</div>
+    </div>
+    <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+    <div>
+      <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;">Stream Revenue</div>
+      <div style="font-size:22px;font-weight:900;color:var(--white);">৳{{ stream_earnings|floatformat:2 }}</div>
+    </div>
+    <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+    <div>
+      <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;">Song Sales</div>
+      <div style="font-size:22px;font-weight:900;color:var(--white);">৳{{ sales_earnings|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+    <a href="{% url 'music:request_withdrawal' %}" class="btn-primary">💸 Withdraw Money</a>
+    <a href="{% url 'music:artist_panel' %}" class="btn-outline sm">📊 Artist Panel</a>
+  </div>
+</div>
+
+<!-- Earning rate info -->
+<div style="background:var(--bg2);border-radius:var(--radius-xl);padding:20px 24px;margin-bottom:28px;display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+  <div style="font-size:20px;">ℹ️</div>
+  <div style="flex:1;">
+    <div style="font-weight:800;margin-bottom:4px;">How you earn</div>
+    <div style="font-size:13px;color:var(--gray);line-height:1.7;">
+      <span style="color:var(--green);font-weight:700;">৳0.50 per 1,000 plays</span> (stream royalty) &nbsp;·&nbsp;
+      <span style="color:#f4c430;font-weight:700;">80% of song sale price</span> (premium songs) &nbsp;·&nbsp;
+      Minimum withdrawal: <span style="color:var(--white);font-weight:700;">৳100</span>
+    </div>
+  </div>
+  <div style="font-size:13px;color:var(--gray);">
+    Total plays: <strong style="color:var(--white);">{{ total_plays }}</strong>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
+
+  <!-- Transactions -->
+  <section>
+    <div class="section-header"><h2 class="section-title sm">📋 Transaction History</h2></div>
+    {% if transactions %}
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      {% for tx in transactions %}
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg2);border-radius:var(--radius);transition:background var(--t);" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+        <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:{% if tx.transaction_type == 'credit' %}rgba(29,185,84,.15){% else %}rgba(233,20,41,.15){% endif %};">
+          {% if tx.transaction_type == 'credit' %}⬆{% else %}⬇{% endif %}
+        </div>
+        <div style="flex:1;overflow:hidden;">
+          <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ tx.description|default:"Transaction" }}</div>
+          <div style="font-size:12px;color:var(--gray);">{{ tx.created_at|date:"d M Y, H:i" }} &nbsp;·&nbsp; {{ tx.get_source_display }}</div>
+        </div>
+        <div style="font-size:16px;font-weight:900;flex-shrink:0;{% if tx.transaction_type == 'credit' %}color:var(--green){% else %}color:var(--red){% endif %};">
+          {% if tx.transaction_type == 'credit' %}+{% else %}-{% endif %}৳{{ tx.amount|floatformat:2 }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">💳</span>
+      <p class="empty-title">No transactions yet</p>
+      <p class="empty-sub">Upload songs and start earning from streams and sales!</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Withdrawal history -->
+  <section>
+    <div class="section-header"><h2 class="section-title sm">💸 Withdrawals</h2></div>
+    {% if withdrawals %}
+    {% for wr in withdrawals %}
+    <div style="background:var(--bg2);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:15px;font-weight:800;">৳{{ wr.amount|floatformat:2 }}</div>
+        <span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;
+          {% if wr.status == 'completed' %}background:rgba(29,185,84,.2);color:var(--green);
+          {% elif wr.status == 'pending' %}background:rgba(244,196,48,.2);color:#f4c430;
+          {% elif wr.status == 'processing' %}background:rgba(80,155,245,.2);color:#509bf5;
+          {% else %}background:rgba(233,20,41,.2);color:var(--red);{% endif %}">
+          {{ wr.get_status_display }}
+        </span>
+      </div>
+      <div style="font-size:13px;color:var(--gray);">
+        via {{ wr.get_method_display }}
+        {% if wr.mobile_number %} · {{ wr.mobile_number }}{% endif %}
+        {% if wr.account_number %} · Acc: {{ wr.account_number }}{% endif %}
+      </div>
+      <div style="font-size:12px;color:var(--gray3);margin-top:4px;">{{ wr.requested_at|date:"d M Y, H:i" }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align:center;padding:32px;color:var(--gray);font-size:13px;">
+      <div style="font-size:40px;margin-bottom:12px;">💸</div>
+      No withdrawals yet
+    </div>
+    {% endif %}
+    <a href="{% url 'music:request_withdrawal' %}" class="btn-primary full" style="margin-top:8px;">Request Withdrawal</a>
+  </section>
+</div>
+{% endblock %}

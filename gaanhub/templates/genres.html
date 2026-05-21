@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Browse Genres — GaanHub{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Browse</h1></div>
+<div class="genres-grid">
+{% with colors="#e91429,#1DB954,#509bf5,#e8115b,#8d67ab,#e3732d,#0d73ec,#f59b23,#1e3264,#148a08,#f037a5,#8e67ac" %}
+{% for genre in genres %}
+<a href="{% url 'music:genre_songs' genre.pk %}" class="genre-card" style="--genre-color:{{ colors|slice:"0:7" }}">
+  <span class="genre-icon-abs">🎵</span>
+  {{ genre.name }}
+</a>
+{% endfor %}
+{% endwith %}
+</div>
+<script>
+// Assign nice gradient colors to genres
+var colors = ['#e91429','#1DB954','#509bf5','#e8115b','#8d67ab','#e3732d','#0d73ec','#f59b23','#1e3264','#148a08','#f037a5','#8e67ac','#c7541a','#477d95'];
+var icons = ['🎸','🎤','🎹','🎺','🥁','🎻','🎷','🎙','🎼','🎵','🎶','🔥','💿','🎧'];
+document.querySelectorAll('.genre-card').forEach(function(el, i){
+  el.style.background = colors[i % colors.length];
+  var ic = el.querySelector('.genre-icon-abs');
+  if(ic) ic.textContent = icons[i % icons.length];
+});
+</script>
+{% endblock %}

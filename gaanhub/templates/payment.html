@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Buy {{ song.title }} — GaanHub{% endblock %}
+{% block content %}
+<div class="form-page">
+    <h1>🔒 Buy Premium Song</h1>
+    <div class="payment-card">
+        <div class="payment-song">
+            {% if song.cover_image %}
+                <img src="{{ song.cover_image.url }}" class="payment-cover" alt="">
+            {% endif %}
+            <div>
+                <p class="payment-title">{{ song.title }}</p>
+                <p class="payment-artist">{{ song.artist.name|default:"Unknown" }}</p>
+                <p class="payment-price">৳{{ song.price }} BDT</p>
+            </div>
+        </div>
+        <hr>
+        <p class="payment-note">⚠ SSLCommerz is configured. Add your store credentials in <code>settings.py</code> to enable live payments.</p>
+        <div class="form-actions">
+            <!-- Demo: simulate success -->
+            <a href="{% url 'music:payment_success' purchase.id %}" class="btn-primary">✅ Simulate Payment (Dev)</a>
+            <a href="{% url 'music:payment_cancel' %}" class="btn-outline">Cancel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

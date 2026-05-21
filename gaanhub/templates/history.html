@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Play History — GaanHub{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>🕘 Recently Played</h1>
+</div>
+
+{% if history %}
+<div class="songs-table-wrap">
+    <table class="song-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Song</th>
+                <th>Artist</th>
+                <th>Played</th>
+                <th>Play</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in history %}
+            <tr>
+                <td class="song-num">{{ forloop.counter }}</td>
+                <td>
+                    <div class="table-song">
+                        {% if entry.song.cover_image %}
+                            <img src="{{ entry.song.cover_image.url }}" class="table-thumb" alt="">
+                        {% else %}
+                            <span class="table-thumb-placeholder">🎵</span>
+                        {% endif %}
+                        <a href="{% url 'music:song_detail' entry.song.pk %}">{{ entry.song.title }}</a>
+                    </div>
+                </td>
+                <td>{{ entry.song.artist.name|default:"Unknown" }}</td>
+                <td class="time-ago">{{ entry.played_at|timesince }} ago</td>
+                <td>
+                    <button class="btn-primary small" onclick="playSong('{{ entry.song.audio_file.url }}','{{ entry.song.title|escapejs }}','{% if entry.song.artist %}{{ entry.song.artist.name|escapejs }}{% endif %}','{% if entry.song.cover_image %}{{ entry.song.cover_image.url }}{% endif %}',{{ entry.song.pk }})">▶</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No listening history yet. Start playing some songs! 🎵</p>
+    <a href="{% url 'music:home' %}" class="btn-primary" style="display:inline-block;margin-top:16px;">Browse Songs</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Recently Played — GaanHub{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>🕐 Recently Played</h1>
+</div>
+
+{% if history %}
+<div class="history-list">
+    {% for entry in history %}
+    <div class="history-row">
+        <div class="history-cover">
+            {% if entry.song.cover_image %}
+                <img src="{{ entry.song.cover_image.url }}" alt="">
+            {% else %}
+                <div class="history-cover-placeholder">🎵</div>
+            {% endif %}
+        </div>
+        <div class="history-info">
+            <a href="{% url 'music:song_detail' entry.song.pk %}" class="history-title">{{ entry.song.title }}</a>
+            <p class="history-artist">{{ entry.song.artist.name|default:"Unknown" }}</p>
+        </div>
+        <div class="history-time">{{ entry.played_at|timesince }} ago</div>
+        <button class="card-play-sm"
+            onclick="playSong('{{ entry.song.audio_file.url }}','{{ entry.song.title|escapejs }}','{% if entry.song.artist %}{{ entry.song.artist.name|escapejs }}{% endif %}','{% if entry.song.cover_image %}{{ entry.song.cover_image.url }}{% endif %}')">▶</button>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><p>No songs played yet. <a href="{% url 'music:home' %}">Start listening →</a></p></div>
+{% endif %}
+{% endblock %}
