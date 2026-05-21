@@ -17,7 +17,6 @@
         <hr>
         <p class="payment-note">⚠ SSLCommerz is configured. Add your store credentials in <code>settings.py</code> to enable live payments.</p>
         <div class="form-actions">
-            <!-- Demo: simulate success -->
             <a href="{% url 'music:payment_success' purchase.id %}" class="btn-primary">✅ Simulate Payment (Dev)</a>
             <a href="{% url 'music:payment_cancel' %}" class="btn-outline">Cancel</a>
         </div>
