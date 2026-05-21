@@ -511,7 +511,7 @@ input[type="color"] { width: 48px; height: 48px; border-radius: var(--radius); b
 .plan-card { cursor: default; }
 .plan-card a.plan-btn { cursor: pointer; }
 
-/* Nav premium active glow */
+
 .nav-link.nav-premium:hover {
   background: linear-gradient(90deg,#f4c43033,transparent);
 }
@@ -742,9 +742,7 @@ input[type="color"] { width: 48px; height: 48px; border-radius: var(--radius); b
   font-style: normal;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   MODE TOGGLE BUTTON — SIDEBAR
-   ═══════════════════════════════════════════════════════════════ */
+
 
 .sidebar-mode-btn {
   display: flex;
@@ -768,7 +766,7 @@ input[type="color"] { width: 48px; height: 48px; border-radius: var(--radius); b
 }
 .sidebar-mode-btn:hover::before { opacity: .12; }
 
-/* Artist variant */
+
 .sidebar-mode-btn.sidebar-mode-artist {
   background: rgba(29,185,84,.1);
   border-color: rgba(29,185,84,.35);
@@ -776,7 +774,7 @@ input[type="color"] { width: 48px; height: 48px; border-radius: var(--radius); b
 .sidebar-mode-btn.sidebar-mode-artist::before { background: var(--green); }
 .sidebar-mode-btn.sidebar-mode-artist:hover { background: rgba(29,185,84,.18); border-color: var(--green); }
 
-/* Listener variant */
+
 .sidebar-mode-btn.sidebar-mode-listener {
   background: rgba(61,138,255,.08);
   border-color: rgba(61,138,255,.3);
@@ -825,23 +823,21 @@ input[type="color"] { width: 48px; height: 48px; border-radius: var(--radius); b
   transform: rotate(180deg);
 }
 
-/* Light theme overrides */
+
 [data-theme="light"] .mode-toggle-btn.mode-artist .mode-toggle-pill { background: rgba(29,185,84,.12); }
 [data-theme="light"] .mode-toggle-btn.mode-listener .mode-toggle-pill { background: rgba(61,138,255,.1); }
 [data-theme="light"] .sidebar-mode-btn.sidebar-mode-artist { background: rgba(29,185,84,.08); }
 [data-theme="light"] .sidebar-mode-btn.sidebar-mode-listener { background: rgba(61,138,255,.06); }
 
-/* ═══════════════════════════════════════════════════════════════
-   PAYMENT GATEWAY & WALLET
-   ═══════════════════════════════════════════════════════════════ */
 
-/* Wallet nav link glow */
+
+
 .nav-link[href*="wallet"].active .nav-icon-wrap {
   background: linear-gradient(135deg, #f4af00, #f4c430);
 }
 .nav-link[href*="wallet"].active .nav-icon { color: #000; }
 
-/* Payment confirm box */
+
 .pay-confirmed {
   background: rgba(29,185,84,.1);
   border: 1px solid rgba(29,185,84,.3);
@@ -851,19 +847,19 @@ input[type="color"] { width: 48px; height: 48px; border-radius: var(--radius); b
 }
 .pay-confirmed-icon { font-size: 48px; margin-bottom: 12px; }
 
-/* Withdrawal status pills */
+
 .w-status-pending   { background:rgba(244,196,48,.15); color:#f4c430; }
 .w-status-processing{ background:rgba(80,155,245,.15);  color:#509bf5; }
 .w-status-completed { background:rgba(29,185,84,.15);   color:var(--green); }
 .w-status-rejected  { background:rgba(233,20,41,.15);   color:var(--red); }
 
-/* Light theme */
+
 [data-theme="light"] .gateway-card { background: var(--bg2); }
 [data-theme="light"] .gateway-card:hover { background: var(--bg3); }
 [data-theme="light"] .method-option { background: var(--bg3); }
 [data-theme="light"] .method-option:hover { background: var(--bg4); }
 
-/* ── ACCESS CONTROL EXTRAS ───────────────────────────────────────── */
+
 .badge.owned{background:#3D91F4;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .badge.streaming{background:rgba(29,185,84,.15);color:#1DB954;border:1px solid rgba(29,185,84,.5);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .premium-gate-banner{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #3d3d5c;border-radius:12px;padding:24px;margin:24px 0;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
