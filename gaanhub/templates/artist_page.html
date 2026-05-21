@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}{{ artist.name }} — GaanHub{% endblock %}
 {% block content %}
+
+
 <div class="hero" style="--hero-bg:#1a1a2e;">
   <div>
     {% if artist.image %}<img src="{{ artist.image.url }}" class="hero-cover" alt="{{ artist.name }}">
     {% else %}<div class="hero-cover-placeholder artist-placeholder">{{ artist.name|first|upper }}</div>{% endif %}
+
+    
   </div>
   <div class="hero-info">
     <p class="hero-type">Artist</p>
@@ -12,6 +16,8 @@
     <p class="hero-meta">{{ follower_count }} follower{{ follower_count|pluralize }} · {{ songs.count }} song{{ songs.count|pluralize }}</p>
     {% if artist.bio %}<p style="color:var(--gray);font-size:14px;max-width:500px;">{{ artist.bio }}</p>{% endif %}
   </div>
+
+  
 </div>
 <div class="hero-actions">
   {% if request.user.is_authenticated %}
@@ -19,11 +25,15 @@
     <button class="follow-btn {% if is_following %}following{% endif %}" id="followBtn" onclick="toggleFollow({{ artist.pk }})">
       {% if is_following %}✓ Following{% else %}+ Follow{% endif %}
     </button>
+
+  
   {% else %}
     <a href="{% url 'login' %}" class="btn-primary">▶ Play All</a>
   {% endif %}
-</div>
 
+
+  
+</div>
 <section class="home-section" style="margin-top:32px;">
   <h2 class="section-title">Songs by {{ artist.name }}</h2>
 </section>
@@ -34,6 +44,9 @@
       {% if song.cover_image %}<img src="{{ song.cover_image.url }}" class="card-img" alt="">
       {% else %}<div class="card-img placeholder">🎵</div>{% endif %}
 
+
+      
+
       {% if song.is_premium %}
         {% if is_premium or song.pk in purchased_ids %}
           <button class="card-play" onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{{ artist.name|escapejs }}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">▶</button>
@@ -43,6 +56,9 @@
       {% else %}
         <button class="card-play" onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{{ artist.name|escapejs }}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">▶</button>
       {% endif %}
+
+
+      
     </div>
     <div class="card-body">
       <a href="{% url 'music:song_detail' song.pk %}" class="card-title">{{ song.title }}</a>
@@ -51,6 +67,8 @@
         <span>❤ {{ song.likes.count }}</span>
         {% if song.is_premium %}<span class="badge premium">৳{{ song.price }}</span>
         {% else %}<span class="badge free">Free</span>{% endif %}
+
+        
       </div>
       {% if request.user.is_authenticated %}
       <div class="card-actions">
