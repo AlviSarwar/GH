@@ -24,7 +24,7 @@ def register(request):
             messages.error(request, 'Username already taken.')
         else:
             user = User.objects.create_user(username=username, email=email, password=password1)
-            # BUG FIX: Auto-create UserProfile so profile pages never crash
+            
             from music.models import UserProfile
             UserProfile.objects.get_or_create(user=user)
             login(request, user)
