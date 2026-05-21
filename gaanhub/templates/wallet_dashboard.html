@@ -2,7 +2,6 @@
 {% block title %}My Wallet — GaanHub{% endblock %}
 {% block content %}
 
-<!-- Wallet Hero -->
 <div style="background:linear-gradient(135deg,#0a2a18,#0d3d24,#1a4a2a);border-radius:var(--radius-xl);padding:32px;margin-bottom:28px;position:relative;overflow:hidden;">
   <div style="position:absolute;right:-20px;top:-20px;font-size:140px;opacity:.06;pointer-events:none;">💰</div>
   <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(29,185,84,.8);margin-bottom:8px;">Artist Wallet</p>
@@ -35,7 +34,6 @@
   </div>
 </div>
 
-<!-- Earning rate info -->
 <div style="background:var(--bg2);border-radius:var(--radius-xl);padding:20px 24px;margin-bottom:28px;display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
   <div style="font-size:20px;">ℹ️</div>
   <div style="flex:1;">
@@ -53,7 +51,6 @@
 
 <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
 
-  <!-- Transactions -->
   <section>
     <div class="section-header"><h2 class="section-title sm">📋 Transaction History</h2></div>
     {% if transactions %}
@@ -82,7 +79,6 @@
     {% endif %}
   </section>
 
-  <!-- Withdrawal history -->
   <section>
     <div class="section-header"><h2 class="section-title sm">💸 Withdrawals</h2></div>
     {% if withdrawals %}
