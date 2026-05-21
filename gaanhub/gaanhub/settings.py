@@ -101,7 +101,7 @@ SSLCOMMERZ_STORE_ID = os.environ.get('SSLCOMMERZ_STORE_ID', 'your_store_id')
 SSLCOMMERZ_STORE_PASS = os.environ.get('SSLCOMMERZ_STORE_PASS', 'your_store_pass')
 SSLCOMMERZ_SANDBOX = True
 
-# ── PREMIUM PLAN PRICING (BDT/month) ─────────────────────────────────────────
+
 PREMIUM_PLAN_PRICES = {
     'individual': 199,
     'student': 99,
