@@ -6,5 +6,5 @@ class MusicConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
 
     def ready(self):
-        # Import signals if you add them later
+        
         pass
