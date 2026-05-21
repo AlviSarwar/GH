@@ -5,6 +5,9 @@
     <h1>Add to Playlist</h1>
     <p class="subtitle">Adding: <strong>{{ song.title }}</strong></p>
 
+
+    
+
     {% if playlists %}
     <div class="playlist-picker">
         {% for pl in playlists %}
@@ -23,6 +26,9 @@
     <p class="subtitle">Or add to a new playlist:</p>
     {% endif %}
 
+
+    
+
     <form method="POST">
         {% csrf_token %}
         <div class="gaanhub-form">
@@ -38,3 +44,8 @@
     </form>
 </div>
 {% endblock %}
+
+
+
+
+
