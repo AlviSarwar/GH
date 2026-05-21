@@ -38,7 +38,6 @@
         <input type="text" name="title" class="form-input" placeholder="Enter song title" required value="{{ form.title.value|default:'' }}">
       </div>
 
-      <!-- Audio file drag-drop zone -->
       <div class="form-group">
         <label class="form-label">Audio File * (MP3, WAV, OGG)</label>
         <div class="dropzone" id="audioDropzone" onclick="document.getElementById('audioInput').click()">
@@ -53,7 +52,6 @@
         </div>
       </div>
 
-      <!-- Cover image drag-drop zone -->
       <div class="form-group">
         <label class="form-label">Cover Image (optional)</label>
         <div class="dropzone" id="coverDropzone" onclick="document.getElementById('coverInput').click()">
@@ -109,7 +107,6 @@
     </form>
   </div>
 
-  <!-- Sidebar tips -->
   <div>
     <div style="background:var(--bg2);border-radius:var(--radius-xl);padding:24px;margin-bottom:20px;">
       <h3 style="font-weight:900;margin-bottom:16px;">💡 Upload Tips</h3>
@@ -149,7 +146,6 @@ function onCoverSelect(input){
     reader.readAsDataURL(input.files[0]);
   }
 }
-// Drag-and-drop
 ['audioDropzone','coverDropzone'].forEach(function(id){
   var el = document.getElementById(id);
   if(!el) return;
@@ -161,7 +157,6 @@ function onCoverSelect(input){
     if(e.dataTransfer.files.length){ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); }
   });
 });
-// Style select inputs
 document.querySelectorAll('select').forEach(function(s){ s.classList.add('form-input'); });
 </script>
 {% endif %}
