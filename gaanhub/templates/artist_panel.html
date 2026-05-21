@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Artist Panel — GaanHub{% endblock %}
 {% block content %}
-
-<!-- Artist Hero -->
 <div class="hero" style="--hero-bg:#0d2d1a; padding-bottom:20px;">
   {% if artist.image %}
     <img src="{{ artist.image.url }}" class="hero-cover circle" alt="{{ artist.name }}" style="width:140px;height:140px;">
@@ -17,7 +15,6 @@
       <strong>{{ songs.count }}</strong> songs &nbsp;·&nbsp;
       <strong>{{ total_plays }}</strong> total plays
     </p>
-    <!-- Artist tier -->
     {% if total_plays >= 10000 %}
       <span class="artist-tier superstar" style="margin-top:10px;display:inline-flex;">⭐ Superstar</span>
     {% elif total_plays >= 1000 %}
@@ -30,19 +27,13 @@
     <a href="{% url 'music:create_song' %}" class="btn-primary">+ Upload Song</a>
   </div>
 </div>
-
-<!-- Tab navigation -->
 <div class="panel-tabs">
   <button class="panel-tab active" onclick="showTab('overview', this)">📊 Overview</button>
   <button class="panel-tab" onclick="showTab('songs', this)">🎵 My Songs</button>
   <button class="panel-tab" onclick="showTab('earnings', this)">💰 Earnings</button>
   <button class="panel-tab" onclick="showTab('upload', this)">⬆ Upload</button>
 </div>
-
-<!-- OVERVIEW TAB -->
 <div class="panel-section active" id="tab-overview">
-
-  <!-- Revenue streams -->
   <div class="revenue-streams">
     <div class="revenue-stream-card" style="--stream-color:var(--green);">
       <div class="stream-icon">▶</div>
@@ -69,8 +60,6 @@
       <div class="stream-sub">Listening to you</div>
     </div>
   </div>
-
-  <!-- Wallet quick-view -->
   <div style="background:linear-gradient(135deg,#0a2a18,#0d3d24);border-radius:var(--radius-xl);padding:22px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;border:1px solid rgba(29,185,84,.2);">
     <div style="flex:1;">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(29,185,84,.7);margin-bottom:4px;">Wallet Balance</div>
@@ -82,8 +71,6 @@
       <a href="{% url 'music:request_withdrawal' %}" class="btn-primary sm">💸 Withdraw</a>
     </div>
   </div>
-
-  <!-- Earnings Hero -->
   <div class="earnings-hero">
     <div>
       <div class="earnings-label">Estimated Total Earnings</div>
@@ -108,8 +95,6 @@
       <div style="font-size:12px;color:var(--gray);">Next payout: End of month</div>
     </div>
   </div>
-
-  <!-- Song performance table -->
   {% if songs %}
   <div class="section-header"><h2 class="section-title sm">🎵 Song Performance</h2></div>
   <div class="songs-table-wrap">
@@ -178,8 +163,6 @@
   </div>
   {% endif %}
 </div>
-
-<!-- SONGS TAB -->
 <div class="panel-section" id="tab-songs">
   <div class="page-header">
     <h2 class="section-title sm">My Songs ({{ songs.count }})</h2>
@@ -210,8 +193,6 @@
     {% endfor %}
   </div>
 </div>
-
-<!-- EARNINGS TAB -->
 <div class="panel-section" id="tab-earnings">
   <div class="section-header" style="margin-bottom:24px;">
     <h2 class="section-title sm">💰 Earnings Breakdown</h2>
@@ -267,8 +248,6 @@
     </div>
   </div>
 </div>
-
-<!-- UPLOAD TAB -->
 <div class="panel-section" id="tab-upload">
   <div class="section-header"><h2 class="section-title sm">⬆ Upload a Song</h2></div>
   <p style="color:var(--gray);font-size:14px;margin-bottom:24px;">Only artists can upload songs. Fill in the details below.</p>
