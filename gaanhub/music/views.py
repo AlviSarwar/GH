@@ -23,7 +23,6 @@ from .models import (
 from .forms import SongForm, ArtistForm, PlaylistForm
 
 
-# ── HELPERS / DECORATORS ──────────────────────────────────────────────────────
 
 def is_artist(user):
     """Return True if the authenticated user has an Artist profile."""
@@ -35,6 +34,7 @@ def user_has_premium(user):
     if not user.is_authenticated:
         return False
     try:
+        
         return user.subscription.is_active()
     except PremiumSubscription.DoesNotExist:
         return False
@@ -48,6 +48,7 @@ def artist_required(view_func):
         if not is_artist(request.user):
             messages.warning(
                 request,
+                
                 '🎤 Only artists can do that. Become an artist to upload music and earn!'
             )
             return redirect('music:become_artist')
@@ -79,7 +80,6 @@ def get_or_create_wallet(artist):
     return wallet
 
 
-# ── PUBLIC / AUTH VIEWS ───────────────────────────────────────────────────────
 
 def landing(request):
     if request.user.is_authenticated:
@@ -112,7 +112,8 @@ def switch_mode(request):
         return redirect('music:home')
 
 
-# ── HOME / SONG BROWSING ──────────────────────────────────────────────────────
+
+
 
 @login_required
 def home(request):
@@ -142,6 +143,7 @@ def song_list(request):
     if query:
         songs = songs.filter(
             Q(title__icontains=query) | Q(artist__name__icontains=query)
+            
         )
     is_premium = user_has_premium(request.user) if request.user.is_authenticated else False
     purchased_ids = set(
@@ -156,18 +158,19 @@ def song_list(request):
     })
 
 
+
 def song_detail(request, pk):
     song = get_object_or_404(Song, pk=pk)
     is_premium_user = user_has_premium(request.user) if request.user.is_authenticated else False
     purchased = song.is_purchased_by(request.user) if request.user.is_authenticated else False
 
-    # Access logic:
-    # - Free song → always playable
-    # - Premium song + active subscription → can play (stream), cannot download unless purchased
-    # - Premium song + purchased → can play and download
-    # - Premium song + neither → show buy prompt
+
+
+
+    
     can_play = song.can_play(request.user) if request.user.is_authenticated else (not song.is_premium)
-    can_download = purchased  # download only for buyers
+    can_download = purchased  
+    
 
     comments = song.comments.select_related('user').all()[:50]
     return render(request, 'detail.html', {
@@ -187,7 +190,8 @@ def record_play(request, pk):
     Blocked if the user does not have access to a premium song."""
     song = get_object_or_404(Song, pk=pk)
 
-    # ── ACCESS GATE ──────────────────────────────────────────────────────────
+
+    
     if not song.can_play(request.user):
         return JsonResponse(
             {'ok': False, 'error': 'premium_required', 'song_id': pk},
@@ -201,7 +205,9 @@ def record_play(request, pk):
     return JsonResponse({'ok': True})
 
 
-# ── SONG DOWNLOAD (purchased songs only) ─────────────────────────────────────
+
+
+
 
 @login_required
 def download_song(request, pk):
@@ -225,7 +231,9 @@ def download_song(request, pk):
     return response
 
 
-# ── SONG CRUD (artist only) ───────────────────────────────────────────────────
+
+
+
 
 @artist_mode_required
 def create_song(request):
@@ -289,7 +297,7 @@ def like_song(request, pk):
     return redirect(request.META.get('HTTP_REFERER', 'music:home'))
 
 
-# ── PLAYLIST VIEWS ────────────────────────────────────────────────────────────
+
 
 @login_required
 def my_playlists(request):
@@ -353,7 +361,8 @@ def remove_from_playlist(request, playlist_id, song_id):
     return redirect('music:playlist_detail', pk=playlist_id)
 
 
-# ── PLAY HISTORY ──────────────────────────────────────────────────────────────
+
+
 
 @login_required
 def play_history(request):
@@ -368,7 +377,9 @@ def play_history(request):
     return render(request, 'history.html', {'history': history})
 
 
-# ── USER PROFILE ──────────────────────────────────────────────────────────────
+
+
+
 
 @login_required
 def user_profile(request, username=None):
@@ -389,7 +400,9 @@ def user_profile(request, username=None):
     except PremiumSubscription.DoesNotExist:
         pass
 
-    # Purchased songs (for the profile owner only)
+
+
+    
     purchased_songs = []
     if profile_user == request.user:
         purchased_songs = list(
@@ -427,7 +440,7 @@ def user_profile(request, username=None):
     })
 
 
-# ── FOLLOW / UNFOLLOW ─────────────────────────────────────────────────────────
+
 
 @login_required
 def follow_artist(request, artist_id):
@@ -448,7 +461,8 @@ def follow_artist(request, artist_id):
     return redirect(request.META.get('HTTP_REFERER', 'music:home'))
 
 
-# ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+
+
 
 @login_required
 def notifications(request):
@@ -463,7 +477,7 @@ def unread_notification_count(request):
     return JsonResponse({'count': count})
 
 
-# ── ARTIST PUBLIC PAGE ────────────────────────────────────────────────────────
+
 
 def artist_page(request, artist_id):
     artist = get_object_or_404(Artist, pk=artist_id)
@@ -488,7 +502,8 @@ def artist_page(request, artist_id):
     })
 
 
-# ── SEARCH ────────────────────────────────────────────────────────────────────
+
+
 
 def search_songs(request):
     """JSON API for live/instant search at /music/api/search/."""
@@ -534,7 +549,9 @@ def global_search(request):
     })
 
 
-# ── ARTIST PANEL ──────────────────────────────────────────────────────────────
+
+
+
 
 @artist_required
 def artist_panel(request):
@@ -590,7 +607,8 @@ def become_artist(request):
     return render(request, 'become_artist.html', {'form': form})
 
 
-# ── COMMENTS ──────────────────────────────────────────────────────────────────
+
+
 
 @login_required
 def add_comment(request, song_id):
@@ -622,7 +640,8 @@ def delete_comment(request, comment_id):
     return JsonResponse({'ok': False, 'error': 'Forbidden'}, status=403)
 
 
-# ── EDIT PROFILE ──────────────────────────────────────────────────────────────
+
+
 
 @login_required
 def edit_profile(request):
@@ -642,7 +661,8 @@ def edit_profile(request):
     return render(request, 'edit_profile.html', {'profile': profile})
 
 
-# ── CHANGE PASSWORD ───────────────────────────────────────────────────────────
+
+
 
 @login_required
 def change_password(request):
@@ -667,7 +687,8 @@ def change_password(request):
     return render(request, 'change_password.html')
 
 
-# ── TOP CHARTS ────────────────────────────────────────────────────────────────
+
+
 
 def top_charts(request):
     top_songs = Song.objects.order_by('-play_count')[:20]
@@ -684,7 +705,7 @@ def top_charts(request):
     })
 
 
-# ── GENRE BROWSE ──────────────────────────────────────────────────────────────
+
 
 def browse_genres(request):
     genres = Genre.objects.annotate(song_count=Count('song')).all()
@@ -707,7 +728,7 @@ def genre_songs(request, genre_id):
     })
 
 
-# ── ALL ARTISTS ───────────────────────────────────────────────────────────────
+
 
 def all_artists(request):
     query = request.GET.get('q', '')
