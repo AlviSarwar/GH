@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ song.title }} — GaanHub{% endblock %}
 {% block content %}
-
-<!-- Hero -->
 <div class="hero" style="--hero-bg:#3d3d3d;">
   <div>
     {% if song.cover_image %}
@@ -36,8 +34,6 @@
     {% endif %}
   </div>
 </div>
-
-<!-- ── ACCESS GATE BANNER ── -->
 {% if song.is_premium and not can_play %}
 <div class="premium-gate-banner">
   <div class="gate-icon">🔒</div>
@@ -55,33 +51,27 @@
   </div>
 </div>
 {% endif %}
-
-<!-- ── SONG ACTIONS ── -->
 <div class="hero-actions">
 
   {% if song.is_premium %}
 
     {% if can_play %}
-      <!-- Has access (premium sub OR purchased) -->
       <button class="btn-primary" id="playBtn"
         onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">
         ▶ Play
       </button>
 
       {% if can_download %}
-        <!-- Purchased → download available -->
         <a href="{% url 'music:download_song' song.pk %}" class="btn-outline" title="Download your purchased copy">
           ⬇ Download
         </a>
       {% else %}
-        <!-- Premium sub but not purchased — offer to buy for download -->
         <a href="{% url 'music:buy_song' song.pk %}" class="btn-outline" title="Buy to download">
           🛒 Buy to Download · ৳{{ song.price }}
         </a>
       {% endif %}
 
     {% else %}
-      <!-- No access -->
       {% if request.user.is_authenticated %}
         <a href="{% url 'music:subscription_plans' %}" class="btn-primary">🎧 Subscribe to Stream</a>
         <a href="{% url 'music:buy_song' song.pk %}" class="btn-outline">🛒 Buy · ৳{{ song.price }}</a>
@@ -91,7 +81,6 @@
     {% endif %}
 
   {% else %}
-    <!-- Free song — always playable -->
     <button class="btn-primary" id="playBtn"
       onclick="playSong('{{ song.audio_file.url }}','{{ song.title|escapejs }}','{% if song.artist %}{{ song.artist.name|escapejs }}{% endif %}','{% if song.cover_image %}{{ song.cover_image.url }}{% endif %}',{{ song.pk }})">
       ▶ Play
@@ -113,8 +102,6 @@
     <a href="{% url 'music:delete_song' song.pk %}" class="btn-outline sm danger">🗑 Delete</a>
   {% endif %}
 </div>
-
-<!-- ── PREMIUM INFO STRIPS ── -->
 {% if song.is_premium and can_play and not purchased %}
 <div class="info-strip streaming-strip">
   🎧 <strong>Streaming via Premium</strong> — You can stream this song anytime.
@@ -127,8 +114,6 @@
   ✅ <strong>You own this song</strong> — Stream and download anytime.
 </div>
 {% endif %}
-
-<!-- ── COMMENTS ── -->
 <div class="comments-section">
   <h2 class="comments-title">Comments <span class="comment-count">{{ song.comments.count }}</span></h2>
   {% if request.user.is_authenticated %}
