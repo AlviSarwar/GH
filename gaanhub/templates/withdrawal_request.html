@@ -22,14 +22,14 @@
     <form method="post" id="withdrawForm">
       {% csrf_token %}
 
-      <!-- Amount -->
+     
       <div class="form-group">
         <label class="form-label">Amount (৳)</label>
         <input type="number" name="amount" class="form-input" min="{{ MIN_WITHDRAWAL }}" max="{{ wallet.balance|floatformat:0 }}" step="1" placeholder="e.g. 500" required style="max-width:240px;">
         <div class="field-help">Min ৳{{ MIN_WITHDRAWAL }} · Max ৳{{ wallet.balance|floatformat:0 }}</div>
       </div>
 
-      <!-- Method selector -->
+      
       <div class="form-group">
         <label class="form-label">Withdrawal Method</label>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px;" id="methodGrid">
@@ -60,7 +60,6 @@
         </div>
       </div>
 
-      <!-- Mobile money fields (bKash/Nagad/Rocket) -->
       <div id="fields-mobile" style="display:none;">
         <div class="form-group">
           <label class="form-label">Account Name</label>
@@ -73,7 +72,6 @@
         </div>
       </div>
 
-      <!-- Bank transfer fields -->
       <div id="fields-bank" style="display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div class="form-group">
