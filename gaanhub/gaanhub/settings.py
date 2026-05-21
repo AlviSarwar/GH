@@ -3,9 +3,7 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ── SECURITY ──────────────────────────────────────────────────────────────────
-# IMPORTANT: In production, set SECRET_KEY via environment variable and set
-# DEBUG=False. Never commit a real secret key to version control.
+
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
     'django-insecure-0*b@o7c2=k9wodoz3pqj1bzydctqto^*$(a!ejq3tx!0ijt=4a'
@@ -15,7 +13,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
-# ── APPLICATIONS ──────────────────────────────────────────────────────────────
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,7 +25,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
 ]
 
-# ── MIDDLEWARE ────────────────────────────────────────────────────────────────
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -40,7 +38,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'gaanhub.urls'
 
-# ── TEMPLATES ─────────────────────────────────────────────────────────────────
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -52,7 +50,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # Custom: injects is_premium + user_subscription into all templates
+                
                 'gaanhub.context_processors.premium_status',
             ],
         },
@@ -61,7 +59,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gaanhub.wsgi.application'
 
-# ── DATABASE ──────────────────────────────────────────────────────────────────
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
