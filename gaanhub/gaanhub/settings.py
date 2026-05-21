@@ -67,7 +67,7 @@ DATABASES = {
     }
 }
 
-# ── AUTH ──────────────────────────────────────────────────────────────────────
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -79,13 +79,13 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/music/home/'
 LOGOUT_REDIRECT_URL = '/music/logged-out/'
 
-# ── INTERNATIONALISATION ──────────────────────────────────────────────────────
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 USE_TZ = True
 
-# ── STATIC & MEDIA ────────────────────────────────────────────────────────────
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -95,8 +95,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ── PAYMENT (SSLCommerz — sandbox) ───────────────────────────────────────────
-# In production, set these via environment variables.
+
+
 SSLCOMMERZ_STORE_ID = os.environ.get('SSLCOMMERZ_STORE_ID', 'your_store_id')
 SSLCOMMERZ_STORE_PASS = os.environ.get('SSLCOMMERZ_STORE_PASS', 'your_store_pass')
 SSLCOMMERZ_SANDBOX = True
